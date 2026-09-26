@@ -9,7 +9,7 @@
 <header class="nav"><div class="wrap"><a class="brand" href="index.html"><img src="img/icon.png?v=2" alt="">Syllabo</a><nav class="links"><a href="index.html#product">Product</a><a href="index.html#compete">Compete</a><a href="index.html#how">How it works</a><a href="index.html#pricing">Pricing</a><a href="support.html">Support</a></nav><a class="btn btn-primary cta" href="https://apps.apple.com/app/syllabo/id6810865998">Get the app</a></div></header>
 <main class="doc">
   <h1>Privacy policy</h1>
-  <p class="updated">Last updated 13 September 2026</p>
+  <p class="updated">Last updated 27 September 2026</p>
   <p>Syllabo keeps your study data on your device. There are no analytics, no advertising and no tracking. If you create an online account, your username, name, email and a backup of your study data are stored with our database provider, Supabase, so you can sign in on another phone and add friends. When AI is turned on, what you send to AI marking or the tutor goes to Anthropic through our server.</p>
 
   <h2>Your account</h2>
@@ -32,10 +32,22 @@
   <p>Deleting the app removes all of it. There is no copy anywhere else.</p>
 
   <h2>AI marking and tutor</h2>
-  <p>When you are signed in with an online account and allow AI, answer marking, diagram marking, examiner and essay feedback, Teach the buddy and the Tutor tab send your answer, drawing or message, the question and its mark scheme, and your first name, subject, level, current syllabus point and short mastery and recent-mistake summaries to Anthropic's Claude models through Syllabo's server (a Supabase Edge Function), over encrypted connections. Our server does not keep what you send; it records only how many AI requests your account made each day, to apply a daily allowance. Anthropic handles the data under its own <a href="https://www.anthropic.com/privacy">privacy policy</a>. The first time you use AI the app asks for your permission, and you can turn AI off at any time in Settings › AI marking and tutor. If you instead enter your own Claude or Gemini API key, the same data goes directly to that provider under its own terms (<a href="https://www.anthropic.com/privacy">Anthropic</a> or <a href="https://policies.google.com/privacy">Google</a>). With AI off, or without a connection, the offline tutor and meaning-based marking work on your device and nothing is sent.</p>
+  <p>When you allow AI, answer marking, diagram marking, examiner and essay feedback, Teach the buddy, the Tutor tab and making flashcards from your notes send your answer, drawing, message or note text, the question and its mark scheme, and your first name, subject, level, current syllabus point and short mastery and recent-mistake summaries to Anthropic's Claude models through Syllabo's server (a Supabase Edge Function), over encrypted connections. This works with an online account, or as a guest on your first day of using AI, through an anonymous sign-in with no name or email. Our server does not keep what you send. It records how many AI requests an account made each day, to apply a daily allowance, and, to stop abuse, counts requests per minute against a one-way hash of your network (IP) address, which is cleared within about an hour. Anthropic handles the data under its own privacy policy. The first time you use AI the app asks for your permission, and you can turn AI off at any time in Settings › AI marking and tutor. If you instead enter your own Claude or Gemini API key, the same data goes directly to that provider under its own terms. With AI off, or without a connection, the offline tutor and meaning-based marking work on your device and nothing is sent.</p>
+
+  <h2>Importing your notes</h2>
+  <p>When you import class notes, the camera scan, photos or PDF pages are turned into text on your device by Apple's text recognition; Syllabo does not upload or keep the images. You can edit the text before anything is made from it. Offline, flashcards are made on your device. With AI on, the note text (never the images) is sent as described under AI marking and tutor to make flashcards and questions. What you save stays on your device, and with an online account it is included in your backup.</p>
 
   <h2>Friends</h2>
   <p>Friends are added by username; with online accounts they can be on any phone. A friend only sees what you allow: activity, mastery and streak can each be hidden, and you can turn off discovery by username. Friends never see your mistakes, notes, answers or email address.</p>
+
+  <h2>Leagues and duels</h2>
+  <p>With an online account you are placed each week in a league of up to 30 students at a similar level, who see your username, display name and XP for that week. In a duel, your friend sees your score, and how you did on each question once you have both played. Scores, results and the coins involved are stored on our server to settle leagues and duels, with a short record of them kept to prevent cheating.</p>
+
+  <h2>Study buddies</h2>
+  <p>A study pact is made with a friend who has an online account. For it, our server stores the pact (the two of you, its length and when it started) and the dates on which you studied: a date only, never what you studied. Your buddy can see the pact's progress and whether you have studied today. Study dates are deleted after about 400 days, and ending a pact stops it for both of you.</p>
+
+  <h2>App updates</h2>
+  <p>To tell you when a new version is out, the app asks Apple's App Store which version is current; that request contains no personal information. Requests to our server include the app's version number, so that very old versions can be asked to update.</p>
 
   <h2>Microphone and speech</h2>
   <p>Teach-the-buddy mode can transcribe your voice using Apple's on-device or Apple-hosted speech recognition, only while you hold the microphone button. Audio is not stored by Syllabo.</p>
@@ -50,7 +62,7 @@
   </ul>
 
   <h2>Children</h2>
-  <p>The app is designed for IB Diploma students managing their own study. It does not knowingly collect personal information from children under 13; accounts exist only on the device.</p>
+  <p>The app is designed for IB Diploma students managing their own study. It does not knowingly collect personal information from children under 13.</p>
 
   <h2>Content and trademarks</h2>
   <p>"International Baccalaureate" and "IB" are trademarks of the International Baccalaureate Organization, which does not endorse this app. Curriculum content is an original summary; past papers are only included when you import ones you are licensed to use.</p>
