@@ -24,11 +24,28 @@
 <title>Syllabo: the IB study app that fits the time you have</title>
 <meta name="description" content="Syllabo turns 5 to 60 minute gaps into IB Diploma progress: sessions built from your weak spots, exam-format questions with marking, flashcards, a tutor that knows your syllabus, and a study buddy that grows with your streak.">
 <meta name="theme-color" content="#F6F5F1">
+<meta name="color-scheme" content="light">
+<meta name="format-detection" content="telephone=no">
+<!-- iOS Safari shows its own "Open / Get" banner for the app -->
+<meta name="apple-itunes-app" content="app-id=6810865998">
+<!-- absolute URLs below assume the go-live layout: this page at https://syllabo.org/ and assets/ beside it -->
+<link rel="canonical" href="https://syllabo.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Syllabo">
+<meta property="og:url" content="https://syllabo.org/">
+<meta property="og:title" content="Syllabo: the IB study app that fits the time you have">
+<meta property="og:description" content="The IB study app that fits the time you have.">
+<meta property="og:image" content="https://syllabo.org/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Syllabo wordmark with an XP chip, a streak, a syllabus point and a grade 7, above the line: The IB syllabus, one session at a time.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Syllabo","description":"A study app for the IB Diploma: sessions built from your weak spots, exam-format questions with marking, flashcards, a tutor that knows your syllabus and a study buddy.","applicationCategory":"EducationalApplication","operatingSystem":"iOS, iPadOS, macOS","url":"https://syllabo.org/","downloadUrl":"https://apps.apple.com/app/syllabo/id6810865998","image":"https://syllabo.org/assets/og.png","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 <link rel="icon" href="../assets/icon.png">
 <link rel="apple-touch-icon" href="../assets/icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=Instrument+Serif:ital@1&family=Poppins:wght@400;500;600&display=swap">
+<link rel="preload" href="../assets/fonts/archivo-wdth-wght-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/poppins-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
 <script>document.documentElement.classList.add('js')</script>
 <style>
 :root{
@@ -46,7 +63,7 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:100px}
 @media (prefers-reduced-motion:no-preference){html:not(.js){scroll-behavior:smooth}}
 html.locked{overflow:hidden}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--body);overflow-x:clip;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--body);overflow-x:hidden;overflow-x:clip;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 ::selection{background:var(--blue);color:#fff}
 img,svg{display:block;max-width:100%}
 img{height:auto}
@@ -54,6 +71,8 @@ a{color:inherit}
 h1,h2,h3,p,ul,ol,figure{margin:0}
 ul,ol{padding:0;list-style:none}
 button{font:inherit;color:inherit}
+a,button,summary{-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){.appstore:active,.nav-cta:active,.menu-btn:active{transform:scale(.97)!important;transition:transform .12s}}
 .px{image-rendering:pixelated}
 .sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
@@ -101,13 +120,22 @@ button{font:inherit;color:inherit}
 .wave path{fill:none;stroke-width:1.6;stroke-linecap:round}
 .wv-t{stroke:rgba(11,19,34,.08)}
 .wv-f{stroke:var(--blue);stroke-dasharray:1;stroke-dashoffset:1}
-.lockup{justify-self:start;display:flex;align-items:center;gap:11px;text-decoration:none;border-radius:12px;padding:4px}
-.lockup img{width:40px;height:40px;border-radius:11px;transition:transform .6s var(--back)}
-.lockup:hover img{transform:rotate(-8deg) scale(1.06)}
-.lockup b{display:block;font:600 15.5px/1.1 var(--body);letter-spacing:-.01em}
-.sub{position:relative;display:block;width:14.4em;height:16px;overflow:hidden;font:400 12px/16px var(--body);color:var(--mute);white-space:nowrap}
-.sub>span{position:absolute;left:0;top:0}
-.sub b{display:inline;font:500 11px/16px var(--mono);letter-spacing:.04em;color:var(--blue)}
+/* lockup: the app icon as a tilted sticker, the wordmark in the display face with a marker spark, and a mono readout
+   of the current section that rolls as you scroll */
+.lockup{justify-self:start;display:flex;align-items:center;gap:12px;text-decoration:none;border-radius:14px;padding:4px 8px 4px 4px}
+.lk-icon{flex:none;display:block;width:42px;height:42px;padding:3px;border-radius:13px;background:#fff;box-shadow:0 0 0 1px rgba(11,19,34,.07),0 9px 16px -10px rgba(11,19,34,.6);transform:rotate(-7deg);transition:transform .7s var(--back)}
+.lk-icon img{width:100%;height:100%;border-radius:10px}
+.lk-txt{display:flex;flex-direction:column;gap:5px}
+.lk-word{position:relative;display:flex;align-self:flex-start;font-family:var(--display);font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;font-size:19px;line-height:.8;letter-spacing:-.03em;color:var(--ink);padding-right:12px}
+.lk-word i{display:block;font-style:normal}
+.lk-spark{position:absolute;right:0;top:-5px;width:10px;height:10px;overflow:visible;transition:transform .8s var(--back)}
+.lk-spark path{fill:var(--gold);stroke:var(--ink);stroke-width:3.2;stroke-linejoin:round}
+.sub{position:relative;display:block;width:14em;height:14px;overflow:hidden;font:500 10.5px/14px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.sub>span{position:absolute;left:0;right:0;top:0;overflow:hidden;text-overflow:ellipsis}
+.sub b{display:inline;font:inherit;color:var(--blue)}
+@media (hover:hover){.lockup:hover .lk-icon{transform:rotate(5deg) scale(1.07)}.lockup:hover .lk-spark{transform:rotate(90deg) scale(1.3)}}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.lockup:hover .lk-word i{animation:lkhop .5s var(--back) both;animation-delay:calc(var(--j)*30ms)}}
+@keyframes lkhop{45%{transform:translateY(-4px)}}
 .links{display:flex;gap:2px;padding:0 6px}
 .links a{position:relative;z-index:1;display:flex;align-items:center;gap:7px;padding:11px 13px;border-radius:12px;font:500 14px/1 var(--body);text-decoration:none}
 .links a:focus-visible{outline-offset:-1px}
@@ -121,22 +149,29 @@ button{font:inherit;color:inherit}
 .circ{position:absolute;left:0;top:0;width:0;height:0;overflow:visible;pointer-events:none;opacity:0}
 .circ path{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1}
 /* marker icons, each with its own personality */
-.l-eyes .ico{width:20px}
+.l-eyes .ico{width:27px;height:20px;stroke-width:1.7}
 .l-eyes .eye{transform-box:fill-box;transform-origin:50% 50%}
 .l-eyes .eye path{fill:#fff}
 .l-eyes .pu{fill:var(--ink);stroke:none}
 .l-bolt .ico path{transition:fill .2s}
-.l-bolt:hover .ico path,.l-bolt:focus-visible .ico path{fill:var(--gold)}
+.l-bolt:focus-visible .ico path{fill:var(--gold)}
+@media (hover:hover){.l-bolt:hover .ico path{fill:var(--gold)}}
 .l-heart .ico path{transition:fill .3s}
-.l-heart:hover .ico path,.l-heart:focus-visible .ico path{fill:var(--coral)}
+.l-heart:focus-visible .ico path{fill:var(--coral)}
+@media (hover:hover){.l-heart:hover .ico path{fill:var(--coral)}}
 .l-arrow{gap:5px}
 .l-arrow .ico{width:24px;height:24px;stroke-width:1.8}
 @media (prefers-reduced-motion:no-preference){
   .rl i{transition:transform .55s var(--ease);transition-delay:calc(var(--j)*16ms)}
-  .links a:not(.knock):hover .rl i,.links a:not(.knock):focus-visible .rl i{transform:translateY(-100%)}
+  .links a:not(.knock):focus-visible .rl i{transform:translateY(-100%)}
   .l-star .ico{transition:transform 1s var(--back)}
-  .l-star:hover .ico,.l-star:focus-visible .ico{transform:rotate(120deg)}
-  .l-heart:hover .ico,.l-heart:focus-visible .ico{animation:beat 1.15s ease-in-out infinite}
+  .l-star:focus-visible .ico{transform:rotate(120deg)}
+  .l-heart:focus-visible .ico{animation:beat 1.15s ease-in-out infinite}
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .links a:not(.knock):hover .rl i{transform:translateY(-100%)}
+  .l-star:hover .ico{transform:rotate(120deg)}
+  .l-heart:hover .ico{animation:beat 1.15s ease-in-out infinite}
 }
 @keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.3)}28%{transform:scale(1)}42%{transform:scale(1.18)}62%{transform:scale(1)}}
 .nav-end{justify-self:end;display:flex;align-items:center;gap:8px}
@@ -148,8 +183,10 @@ a:hover .arrbox svg,a:focus-visible .arrbox svg{transform:translate(2px,-2px)}
 .nav-cta .arrbox{position:relative;display:block;color:var(--ink)}
 .nav-cta .arrbox svg{position:absolute;left:9px;top:9px;transition:transform .55s var(--ease)}
 .nav-cta .arrbox .a2{transform:translate(-28px,28px)}
-.nav-cta:hover .arrbox .a1,.nav-cta:focus-visible .arrbox .a1{transform:translate(28px,-28px)}
-.nav-cta:hover .arrbox .a2,.nav-cta:focus-visible .arrbox .a2{transform:none}
+.nav-cta:focus-visible .arrbox .a1{transform:translate(28px,-28px)}
+.nav-cta:focus-visible .arrbox .a2{transform:none}
+@media (hover:hover){.nav-cta:hover .arrbox .a1{transform:translate(28px,-28px)}.nav-cta:hover .arrbox .a2{transform:none}}
+@media (prefers-reduced-motion:reduce){.nav,.nav.ready .bar-bg,.nav-cta .arrbox svg{transition:none}.nav-cta .arrbox .a2{display:none}.nav-cta:hover .arrbox .a1,.nav-cta:focus-visible .arrbox .a1{transform:none}}
 .menu-btn{display:none;align-items:center;gap:10px;height:46px;padding:0 16px;border-radius:14px;background:#ECEBE6;color:var(--ink);font:500 14px/1 var(--body);text-decoration:none;border:0;cursor:pointer}
 .menu-btn i{display:grid;gap:4px}
 .menu-btn i::before,.menu-btn i::after{content:"";display:block;width:16px;height:2px;border-radius:2px;background:currentColor;transition:transform .4s var(--ease)}
@@ -157,7 +194,8 @@ a:hover .arrbox svg,a:focus-visible .arrbox svg{transform:translate(2px,-2px)}
 .menu-btn[aria-expanded="true"] i::after{transform:translateY(-3px) rotate(-45deg)}
 @media (max-width:1179px){.links .ico{display:none}.links a{padding:11px 12px}}
 @media (max-width:959px){.bar{grid-template-columns:1fr auto;pointer-events:auto}.links{display:none}.menu-btn{display:inline-flex}.nav .bar-bg{clip-path:inset(0 0 0 0 round 18px)}.nav .wave{opacity:1}}
-@media (max-width:479px){.nav-cta{display:none}.bar{height:60px}.sub{font-size:11px}.menu-btn{background:var(--ink);color:#fff}}
+@media (max-width:559px){.nav-cta{display:none}.menu-btn{background:var(--ink);color:#fff}}
+@media (max-width:479px){.bar{height:60px}.lk-icon{width:38px;height:38px;border-radius:12px}.lk-word{font-size:17px}.sub{font-size:9.5px;max-width:calc(100vw - 2*var(--pad) - 190px)}.menu-btn{background:var(--ink);color:#fff}}
 .sheet{position:fixed;inset:0;z-index:990;background:var(--paper);padding:104px var(--pad) 32px;display:flex;flex-direction:column;overflow-y:auto}
 .sheet[hidden]{display:none}
 .sheet nav a{display:flex;align-items:baseline;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:800;font-stretch:125%;font-size:clamp(30px,9vw,54px);line-height:1.1;letter-spacing:-.03em;text-decoration:none}
@@ -172,13 +210,13 @@ a:hover .arrbox svg,a:focus-visible .arrbox svg{transform:translate(2px,-2px)}
 /* ---------- hero ---------- */
 .hero{position:relative}
 .hero-stage{position:relative;height:100vh;height:100svh;min-height:620px;display:grid;grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"field" "foot";padding-top:86px;overflow:hidden}
-@media (min-width:760px) and (prefers-reduced-motion:no-preference){html.js .hero{height:150vh}html.js .hero-stage{position:sticky;top:0}}
-.field{grid-area:field;position:relative;min-height:0;touch-action:pan-y}
+@media (min-width:760px) and (min-height:640px) and (prefers-reduced-motion:no-preference){html.js .hero{height:150vh}html.js .hero-stage{position:sticky;top:0}}
+.field{grid-area:field;position:relative;min-height:0;touch-action:pan-y pinch-zoom}
 html.js .field{cursor:grab}
 html.js .field.grabbing,html.js .field.grabbing a{cursor:grabbing}
 .orbit{position:absolute;inset:0}
 @media (min-width:760px){.field{position:absolute;grid-area:auto;left:0;right:0;top:86px;bottom:0}.hero .mark,.hero .doodles{top:44%}.hero .wordmark{font-size:min(9.8vw,26vh)}.hero .doodles{scale:.66}.hero .tagline span{display:inline}.hero .tagline span+span::before{content:" · "}}
-.card{--aa:var(--a);position:absolute;left:calc(50% + cos(var(--aa))*39%);top:calc(50% + sin(var(--aa))*33%);display:block;text-decoration:none;color:var(--ink);transform:translate(-50%,-50%) rotate(calc(var(--t)*1deg)) scale(calc(.45 + .25*(cos(var(--aa) - 55deg) + 1)));-webkit-tap-highlight-color:transparent;-webkit-user-drag:none;user-select:none}
+.card{--aa:var(--a);position:absolute;left:calc(50% + cos(var(--aa))*39%);top:calc(50% + sin(var(--aa))*33%);display:block;text-decoration:none;color:var(--ink);transform:translate(-50%,-50%) rotate(calc(var(--t)*1deg)) scale(calc(.45 + .25*(cos(var(--aa) - 55deg) + 1)));-webkit-tap-highlight-color:transparent;-webkit-user-drag:none;-webkit-user-select:none;user-select:none}
 html.js .card{left:0;top:0;opacity:0;will-change:transform,opacity}
 .shd{position:absolute;inset:8% 6% 0;border-radius:18px;box-shadow:0 34px 50px -18px rgba(11,19,34,.55);opacity:.6}
 .face{position:relative;display:block;width:calc(var(--w)*var(--k,1)*1px);border-radius:calc(16px*var(--k,1));overflow:hidden;background:var(--card);box-shadow:0 2px 8px -2px rgba(11,19,34,.18)}
@@ -197,11 +235,11 @@ html.js .card{left:0;top:0;opacity:0;will-change:transform,opacity}
 .tok .face>svg{width:1.08em;height:1.08em;flex:none}
 .tok .shd{inset:16% 8% 0;border-radius:999px}
 .c-coin{--fs:30px}
-.c-streak{--fs:27px}.c-streak .face{background:var(--coral);color:#fff}
+.c-streak{--fs:27px}.c-streak .face{background:#CE4744;color:#fff}
 .c-code{--fs:27px}.c-code .face{background:var(--ink);color:#fff;gap:.42em;padding-left:.72em}
 .c-code b{font:600 .8em/1 var(--mono);letter-spacing:0;color:var(--blue-2)}
-.c-ok{--fs:29px}.c-ok .face{background:#2DA44E;color:#fff}
-.c-crate{--fs:26px}.c-crate .face{background:var(--violet);color:#fff}
+.c-ok{--fs:29px}.c-ok .face{background:#1F883D;color:#fff}
+.c-crate{--fs:26px}.c-crate .face{background:#7364DF;color:#fff}
 .c-test{--fs:25px}
 .c-test .dim{margin-left:.1em;font:500 .7em/1 var(--body);letter-spacing:-.01em;color:var(--mute)}
 .c-subj{--fs:29px}.c-subj .face{background:#DCE6FA;padding-left:.74em}
@@ -239,7 +277,7 @@ html.js .card{left:0;top:0;opacity:0;will-change:transform,opacity}
 .wordmark{display:flex;font-size:min(15vw,33vh);color:var(--ink);line-height:.8;white-space:nowrap}
 .wordmark span{display:block}
 .wordmark.wob{filter:url(#wob)}
-.tagline{margin-top:clamp(14px,2.4vh,28px);font:500 clamp(12.5px,1vw,15px)/1.4 var(--body);color:var(--mute);text-align:center}
+.tagline{margin-top:clamp(14px,2.4vh,28px);max-width:calc(100vw - 2*var(--pad));font:500 clamp(12.5px,1vw,15px)/1.4 var(--body);color:var(--mute);text-align:center;text-wrap:balance}
 .tagline span{display:block}
 .doodles{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
 .doodles.back{z-index:12}.doodles.front{z-index:18}
@@ -288,7 +326,7 @@ html.js .card{left:0;top:0;opacity:0;will-change:transform,opacity}
 /* ---------- subjects ---------- */
 .subjects{padding:clamp(40px,6vw,72px) 0;background:var(--paper-2);border-block:1px solid var(--line);position:relative;z-index:1}
 .subjects .sec-label{max-width:var(--max);margin:0 auto 26px;padding:0 var(--pad)}
-.lead-in{max-width:var(--max);margin:0 auto 34px;padding:0 var(--pad);font:500 clamp(22px,2.4vw,36px)/1.22 var(--body);letter-spacing:-.025em;color:var(--grey);text-wrap:balance}
+.lead-in{max-width:var(--max);margin:0 auto 34px;padding:0 var(--pad);font:500 clamp(22px,2.4vw,36px)/1.22 var(--body);letter-spacing:-.025em;color:#646A74;text-wrap:balance}
 .lead-in span{color:var(--ink)}
 .subjects h2{max-width:var(--max);margin:0 auto 28px;padding:0 var(--pad);font:500 clamp(18px,1.6vw,22px)/1.35 var(--body);letter-spacing:-.01em}
 .subjects h2 .num{font-weight:600;color:var(--blue)}
@@ -299,7 +337,7 @@ html.js .card{left:0;top:0;opacity:0;will-change:transform,opacity}
 .mrow li{display:flex;align-items:center;white-space:nowrap;font-family:var(--display);font-weight:700;font-stretch:115%;font-size:clamp(22px,2.6vw,38px);line-height:1.25;letter-spacing:-.015em;color:#7A808A;transition:color .25s}
 .mrow li::after{content:"";width:7px;height:7px;border-radius:50%;background:#C9C6BC;margin:0 clamp(18px,2.4vw,36px)}
 .mrow li:hover{color:var(--ink)}
-.marquee:hover .mrow,.marquee:focus .mrow,.marquee:focus-within .mrow,.marquee.off .mrow{animation-play-state:paused}
+.marquee:hover .mrow,.marquee:focus .mrow,.marquee:focus-within .mrow,.marquee.off .mrow,.marquee.held .mrow{animation-play-state:paused}
 @keyframes marq{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.mrow{animation:none;width:auto;padding:0 var(--pad)}.mrow,.mrow ul{flex-wrap:wrap;justify-content:center}.mrow ul[aria-hidden]{display:none}}
 
@@ -364,7 +402,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .chip.dk{background:var(--ink);color:#fff}
 .stamp{position:absolute;z-index:2;right:9%;top:12%;width:112px;height:112px;border-radius:50%;border:3px solid var(--coral);color:var(--coral);display:grid;place-content:center;text-align:center;transform:rotate(-12deg);background:#fff;font-family:var(--display);font-weight:900;font-stretch:125%;font-size:26px;line-height:.95;box-shadow:0 16px 30px -16px rgba(11,19,34,.5)}
 .stamp small{display:block;font:600 10px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase}
-.dc-vis .skin{position:absolute;z-index:2;left:4%;bottom:0;width:128px;height:128px}
+.dc-vis .dc-skin{position:absolute;z-index:2;left:4%;bottom:0;width:128px;height:128px}
 .meter{display:none;align-items:center;gap:16px;color:var(--ink)}
 .meter .cur{position:relative;height:40px;overflow:hidden;font:500 40px/40px var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
 .meter .roll{display:block;transition:transform .6s var(--back)}
@@ -452,11 +490,11 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .br-head{display:flex;justify-content:space-between;gap:12px;font:500 11.5px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute-dark);margin-bottom:10px}
 .br-head b{color:#fff;font-weight:500}
 .br-body{position:relative}
-.br-slots li{height:42px;display:grid;grid-template-columns:30px 1fr auto;align-items:center;font-size:14px;color:var(--mute-dark);border-top:1px solid rgba(255,255,255,.07)}
+.br-slots li{height:var(--brh,42px);display:grid;grid-template-columns:30px 1fr auto;align-items:center;font-size:14px;color:var(--mute-dark);border-top:1px solid rgba(255,255,255,.07)}
 .br-slots li span:first-child{font:500 13px var(--mono)}
 .br-slots li span:last-child{font-variant-numeric:tabular-nums}
 .br-people{position:absolute;left:30px;top:0;right:96px}
-.br-people li{position:absolute;left:0;right:0;top:0;height:42px;display:flex;align-items:center;gap:10px;font-size:14px;color:#DCE3EF;transform:translateY(calc((var(--r) - 1)*42px));transition:transform .75s var(--back)}
+.br-people li{position:absolute;left:0;right:0;top:0;height:var(--brh,42px);display:flex;align-items:center;gap:10px;font-size:14px;color:#DCE3EF;transform:translateY(calc((var(--r) - 1)*var(--brh,42px)));transition:transform .75s var(--back)}
 .br-people .you{color:#fff;font-weight:600}
 .br-people .you::before{content:"";position:absolute;inset:5px -10px 5px -36px;border-radius:10px;background:rgba(106,155,239,.18);border:1px solid rgba(106,155,239,.45);z-index:-1}
 .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 11.5px/1 var(--body);color:#fff;flex:none}
@@ -479,6 +517,8 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .halo{position:absolute;left:50%;top:50%;width:min(420px,32vw,56vh);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--hc,#C8794A) 0%,transparent 66%);opacity:.22;transition:background .6s}
 .rings-deco{position:absolute;left:50%;top:50%;width:min(470px,36vw,62vh);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(255,255,255,.08);box-shadow:0 0 0 46px rgba(255,255,255,.015),inset 0 0 0 46px rgba(255,255,255,.015)}
 .roll-names li{position:absolute;left:0;right:0;top:50%;height:76px;margin-top:-38px;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-family:var(--display);font-weight:900;font-stretch:125%;font-size:clamp(30px,3vw,48px);letter-spacing:-.03em;color:#fff;will-change:transform,opacity}
+/* short desktop screens (1280x720 and similar): a tighter bracket so it clears the bottom of the pinned stage */
+@media (min-width:1100px) and (min-height:720px) and (max-height:820px) and (prefers-reduced-motion:no-preference){html.js .ladder-stage{padding-top:96px;padding-bottom:70px}html.js .bracket{--brh:35px;margin-top:16px;padding:14px 16px 8px}.lad-copy p{font-size:14.5px;margin-top:8px}}
 .lad-meta{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font:500 11.5px/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--mute-dark);white-space:nowrap}
 /* duels and rings */
 .duo{max-width:var(--max);margin:0 auto;padding:clamp(40px,6vw,90px) var(--pad);display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
@@ -504,8 +544,12 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .pot{margin-top:14px;font:500 11.5px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute-dark)}
 .ring-row{display:flex;justify-content:space-between;gap:12px;margin-top:auto;padding-top:28px}
 .ring{flex:1;text-align:center}
-.ring svg{width:100%;max-width:132px;margin:0 auto;transform:rotate(-90deg);overflow:visible}
-.ring .trk{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12}
+.ring .rg{position:relative;display:block;max-width:132px;margin:0 auto}
+.ring .rsv{width:100%;transform:rotate(-90deg);overflow:visible}
+.ring .glyph{position:absolute;left:50%;top:50%;width:36%;height:36%;transform:translate(-50%,-50%);fill:var(--c);transition:transform .7s var(--back) 1.1s,opacity .4s 1s}
+.ring:nth-child(2) .glyph{transition-delay:1.25s}.ring:nth-child(3) .glyph{transition-delay:1.4s}
+@media (prefers-reduced-motion:no-preference){html.js .ring-row:not(.in) .glyph{opacity:0;transform:translate(-50%,-50%) scale(.4)}}
+.ring .trk{fill:none;stroke:var(--c);stroke-opacity:.18;stroke-width:12}
 .ring .val{fill:none;stroke:var(--c);stroke-width:12;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;transition:stroke-dashoffset 1.6s var(--ease)}
 .ring:nth-child(2) .val{transition-delay:.15s}.ring:nth-child(3) .val{transition-delay:.3s}
 .ring figcaption{margin-top:12px;font-size:13px;color:var(--mute-dark)}
@@ -531,6 +575,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .skin:hover img{transform:translate(-50%,-56%)}
 .skin p{padding:14px 16px;display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.3;color:var(--mute-dark)}
 .skin p b{font-weight:600;font-size:15px;color:#fff}
+@media (max-width:599px){.skin-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.skin{border-radius:18px}.skin img{width:96px;height:96px}.skin p{padding:10px 12px;font-size:11.5px}.skin p b{font-size:14px}}
 @media (prefers-reduced-motion:no-preference){html.js .skin-grid:not(.in) .skin{opacity:0;transform:translateY(30px)} .skin{transition:transform .8s var(--ease),opacity .6s;transition-delay:calc(var(--i)*40ms)}}
 
 /* ---------- included ---------- */
@@ -564,13 +609,13 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .plan.soon h3{color:var(--ink-2)}
 .price{margin-top:10px;font-size:clamp(56px,6vw,88px);display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:4px;line-height:.9}
 .price small{font:500 15px var(--body);letter-spacing:0;color:var(--mute);white-space:nowrap}
-.plan.soon .price{color:#9A9EA6}
+.plan.soon .price{color:#7A7F88}
 .plan ul{margin:26px 0 30px;display:grid;gap:12px}
 .plan li{display:grid;grid-template-columns:22px 1fr;gap:12px;font-size:15px}
 .plan li svg{width:20px;height:20px;margin-top:2px}
 .plan .appstore{align-self:flex-start;margin-top:auto}
 .badge-soon{align-self:flex-start;margin-bottom:16px;padding:7px 12px;border-radius:999px;background:#E2E0D8;font:500 11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.inline{color:var(--blue);font-weight:500}
+.inline{color:var(--blue);font-weight:500;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
 .sticker{position:absolute;right:clamp(16px,3vw,36px);top:clamp(-38px,-3vw,-26px);width:128px;height:128px;border-radius:50%;background:var(--gold);display:grid;place-items:center;box-shadow:0 18px 30px -16px rgba(11,19,34,.5)}
 .sticker svg{position:absolute;inset:0;width:100%;height:100%}
 .sticker text{font:600 10px var(--mono);letter-spacing:0;fill:var(--ink)}
@@ -610,31 +655,33 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 @media (max-width:759px){.cta-grid{grid-template-columns:1fr}.cta .pipw{width:100px;height:116px;order:-1}}
 .site-foot{background:var(--paper);border-top:1px solid var(--line);overflow:hidden}
 .fcols{max-width:var(--max);margin:0 auto;padding:56px var(--pad) 40px;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:32px}
-.fcols .brand{display:inline-flex;align-items:center;gap:10px;font-weight:600;text-decoration:none}
-.fcols .brand img{width:34px;height:34px;border-radius:9px}
+.fcols .brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none}
+.fcols .brand .lk-icon{width:38px;height:38px;border-radius:12px}
+@media (hover:hover){.fcols .brand:hover .lk-icon{transform:rotate(5deg) scale(1.07)}.fcols .brand:hover .lk-spark{transform:rotate(90deg) scale(1.3)}}
 .fcols p{margin-top:14px;max-width:34ch;font-size:14px;color:var(--mute)}
 .fh{font:500 11.5px/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
 .fcols ul{display:grid;gap:9px;font-size:14.5px}
+@media (pointer:coarse){.fcols ul{gap:0}.fcols ul a{display:inline-block;padding:10px 0}.fcols ul a::after{bottom:8px}}
 .fcols a{text-decoration:none}
 @media (max-width:759px){.fcols{grid-template-columns:1fr 1fr}.fcols>div:first-child{grid-column:1/-1}}
-.giant{position:relative;display:flex;justify-content:center;padding:0 var(--pad);font-size:calc((100vw - 2*var(--pad))/6.15);line-height:.8;color:var(--ink);user-select:none;margin-top:calc(70px + 4vw)}
+.giant{position:relative;display:flex;justify-content:center;padding:0 var(--pad);font-size:calc((100vw - 2*var(--pad))/6.15);line-height:.8;color:var(--ink);-webkit-user-select:none;user-select:none;margin-top:calc(70px + 4vw)}
 .giant>span{display:block;position:relative}
 .giant .gl{display:block}
 .prop{position:absolute;display:block;transform:rotate(var(--r,0deg));transform-origin:50% 100%;transition:transform .7s var(--back)}
 .p-icon{--r:-12deg;left:.43em;bottom:.115em;width:.31em}
 .p-icon img{width:100%;height:auto;border-radius:22%;box-shadow:0 .025em .05em -.015em rgba(11,19,34,.5)}
-.p-icon:hover{transform:rotate(-5deg) translateY(-.03em)}
+@media (hover:hover){.p-icon:hover{transform:rotate(-5deg) translateY(-.03em)}}
 .p-xp{--r:-11deg;left:50%;bottom:calc(100% - .1em);transform-origin:30% 100%}
 .xpc{display:flex;align-items:center;gap:.3em;padding:.45em .72em .45em .5em;border-radius:999px;background:var(--gold);color:var(--ink);font-size:calc(.12em*var(--ps,1));line-height:1;letter-spacing:-.02em;white-space:nowrap;box-shadow:0 .3em .6em -.35em rgba(11,19,34,.55)}
 .xpc svg{width:1em;height:1em}
-.p-xp:hover{transform:rotate(-3deg) translateY(-.03em)}
+@media (hover:hover){.p-xp:hover{transform:rotate(-3deg) translateY(-.03em)}}
 .p-coin{--r:9deg;left:50%;bottom:calc(100% - .085em);width:calc(.2em*var(--ps,1));margin-left:calc(-.1em*var(--ps,1))}
 .p-coin svg{width:100%;height:auto;filter:drop-shadow(0 .02em .02em rgba(11,19,34,.25))}
-.p-coin:hover{transform:rotate(-16deg) translateY(-.05em)}
+@media (hover:hover){.p-coin:hover{transform:rotate(-16deg) translateY(-.05em)}}
 .p-star{left:50%;bottom:calc(100% + .07em);width:calc(.2em*var(--ps,1));margin-left:calc(-.1em*var(--ps,1))}
 .p-star svg{width:100%;height:auto;overflow:visible;filter:url(#grain)}
 .p-star path{fill:none;stroke:var(--blue);stroke-width:6;stroke-linejoin:round}
-.p-star:hover{transform:rotate(36deg) scale(1.15)}
+@media (hover:hover){.p-star:hover{transform:rotate(36deg) scale(1.15)}}
 @media (max-width:759px){.giant{--ps:1.6}.p-xp{margin-left:-.28em}}
 @media (prefers-reduced-motion:no-preference){
   html.js .giant .gl{transform:translateY(var(--gy,0%));will-change:transform}
@@ -656,7 +703,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 /* ---------- reveals ---------- */
 @media (prefers-reduced-motion:no-preference){
   html.js .rise .wm{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
-  html.js .rise .wi{display:inline-block;transform:translateY(108%);transition:transform 1s var(--ease);transition-delay:var(--dl,0s)}
+  html.js .rise .wi{display:inline-block;transform:translateY(135%);transition:transform 1s var(--ease);transition-delay:var(--dl,0s)}
   html.js .rise.in .wi{transform:none}
   html.js .fade{opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .9s var(--ease)}
   html.js .fade.in{opacity:1;transform:none}
@@ -678,6 +725,10 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
     <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#fff"/><path d="M6.8 12.4l3.4 3.4 7-7.2" fill="none" stroke="#2DA44E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-crate" viewBox="0 0 24 24"><path d="M2.8 8.2 12 3.6l9.2 4.6v9.6L12 22.4l-9.2-4.6z" fill="#fff"/><path d="M2.8 8.2 12 12.8l9.2-4.6M12 12.8v9.6" fill="none" stroke="#7C6CF0" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.4 5.9l9.2 4.6v3.6" fill="none" stroke="#FFC93C" stroke-width="2.4" stroke-linejoin="round"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="2.2" y="3.6" width="19.6" height="18.6" rx="4.6" fill="#E6EEFC"/><path d="M2.2 8.2a4.6 4.6 0 0 1 4.6-4.6h10.4a4.6 4.6 0 0 1 4.6 4.6v1.6H2.2z" fill="#F0524F"/><path d="M7.4 1.8v3.8M16.6 1.8v3.8" stroke="#0B1322" stroke-width="2.2" stroke-linecap="round"/><g fill="#9DB4E6"><circle cx="7.6" cy="14" r="1.5"/><circle cx="12" cy="14" r="1.5"/><circle cx="7.6" cy="18.2" r="1.5"/><circle cx="12" cy="18.2" r="1.5"/></g><circle cx="16.4" cy="14" r="1.5" fill="#2F63D6"/></symbol>
+    <!-- subject glyphs from the app's Tabler Icons font (MIT, (c) Pawel Kuna): microscope, flask, math-function -->
+    <symbol id="i-bio" viewBox="0 0 24 24"><path d="M16.32 2.59Q16.44 2.35 16.63 2.21Q16.97 1.94 17.42 2.02L17.45 2.02Q17.59 2.04 17.72 2.12Q17.86 2.21 18.22 2.57L19.42 3.74Q20.98 5.30 21.07 5.45Q21.34 5.83 21.20 6.26Q21.07 6.70 20.66 6.91Q20.26 7.13 19.80 6.89Q19.63 6.77 18.02 5.18L16.66 3.77Q16.39 3.50 16.33 3.38Q16.27 3.26 16.27 3.07L16.27 2.86Q16.27 2.69 16.32 2.59ZM14.69 4.18Q14.86 4.01 15.26 4.01L15.31 4.01Q15.50 4.01 15.61 4.07Q15.72 4.13 16.01 4.39L16.90 5.28L18.79 7.15Q19.08 7.44 19.13 7.54Q19.30 7.87 19.25 8.12Q19.20 8.38 18.94 8.69Q18.77 8.90 18.24 9.43L17.40 10.27Q18.48 11.35 18.96 13.03Q19.44 14.76 19.08 16.49Q18.70 18.38 17.35 19.80L17.16 19.99L18.22 19.99Q19.34 19.99 19.42 20.02Q19.66 20.04 19.85 20.21Q20.04 20.38 20.16 20.59Q20.21 20.69 20.21 20.86L20.21 21.14Q20.21 21.31 20.16 21.41Q20.04 21.62 19.85 21.79Q19.66 21.96 19.42 21.98Q19.30 22.01 12.24 22.01Q5.18 22.01 5.06 21.98Q4.82 21.96 4.63 21.79Q4.44 21.62 4.32 21.41Q4.27 21.31 4.27 21.14L4.27 20.86Q4.27 20.69 4.32 20.59Q4.51 20.18 4.90 20.06Q5.14 19.99 5.71 19.99L6.24 19.99L6.24 19.01Q5.59 18.91 5.35 18.50Q5.14 18.14 5.28 17.71Q5.42 17.28 5.78 17.11Q5.95 17.02 6.18 17.00Q6.41 16.99 7.34 16.99Q8.09 16.99 8.33 17.02Q8.47 17.02 8.59 17.06L8.59 17.06Q9.02 17.23 9.17 17.66Q9.31 18.10 9.11 18.49Q8.90 18.89 8.40 18.98L8.23 19.01L8.23 19.99L10.39 19.99Q12.22 19.99 12.62 19.97Q13.03 19.94 13.49 19.85Q14.74 19.54 15.65 18.67Q16.56 17.81 16.97 16.63Q17.38 15.46 17.18 14.23Q16.97 12.94 16.10 11.86L15.98 11.69L14.42 13.25Q12.96 14.71 12.74 14.86Q12.29 15.12 11.86 14.93Q11.62 14.81 11.16 14.35L10.75 13.92L10.30 14.35Q9.86 14.78 9.67 14.88Q9.36 15.07 8.95 14.95Q8.50 14.81 8.32 14.40Q8.14 13.99 8.33 13.56Q8.35 13.46 8.59 13.22L9.31 12.50L8.86 12.05Q8.42 11.62 8.33 11.40Q8.16 11.04 8.33 10.58Q8.38 10.49 8.88 9.96Q9.48 9.34 11.47 7.34Q12.94 5.88 14.59 4.27ZM12.94 8.71L10.66 11.02Q11.45 11.81 12.24 12.58Q14.54 10.30 16.82 8.02L15.24 6.43Z"/></symbol>
+    <symbol id="i-chem" viewBox="0 0 24 24"><path d="M9.02 2.02Q9.14 1.97 12.22 1.97Q15.29 1.97 15.43 2.02Q15.94 2.14 16.13 2.58Q16.32 3.02 16.13 3.46Q15.94 3.89 15.41 3.98L15.24 4.01L15.24 8.81L17.23 14.30Q19.18 19.58 19.27 19.92Q19.39 20.40 19.22 20.88Q18.98 21.53 18.34 21.84L18.26 21.89Q18.12 21.96 17.95 21.96Q17.69 22.01 16.87 22.01L7.37 22.01Q6.60 21.98 6.46 21.96Q5.90 21.82 5.56 21.41Q5.21 21.00 5.16 20.45L5.16 20.42Q5.14 20.23 5.21 19.97Q5.33 19.61 5.76 18.41L9.24 8.81L9.24 4.01Q8.54 3.91 8.33 3.46Q8.11 3.05 8.34 2.59Q8.57 2.14 9.02 2.02ZM11.23 4.01L11.23 7.99L13.25 7.99L13.25 4.01ZM10.92 10.06Q9.12 15.02 7.32 19.99L17.16 19.99L17.14 19.94Q17.14 19.92 15.34 14.95L13.54 10.03L12.24 10.01L10.94 10.01Z"/></symbol>
+    <symbol id="i-math" viewBox="0 0 24 24"><path d="M4.25 19.06Q4.25 19.37 4.54 19.68Q4.82 19.99 5.26 19.99Q5.69 19.99 6.10 18.36Q6.31 17.42 6.62 15.46Q6.96 13.32 7.03 13.06L7.03 13.01L6.10 13.01Q5.18 13.01 4.92 12.94Q4.56 12.84 4.32 12.41Q4.27 12.31 4.27 12.14L4.27 11.86Q4.27 11.69 4.32 11.59Q4.49 11.28 4.68 11.16Q4.87 11.04 5.23 11.02Q5.50 10.99 6.29 10.99L7.42 10.99L7.99 7.58Q8.30 5.64 8.57 4.75Q9.00 3.26 9.67 2.62Q10.51 1.80 11.81 2.06Q12.77 2.26 13.46 3.00Q14.23 3.82 14.23 4.92Q14.23 5.52 13.85 5.80Q13.46 6.07 13.01 5.96Q12.55 5.86 12.34 5.42Q12.26 5.28 12.24 5.00Q12.22 4.73 12.11 4.51Q12.00 4.30 11.76 4.15Q11.52 4.01 11.26 4.01Q10.78 4.01 10.32 5.95Q10.08 7.06 9.72 9.46Q9.53 10.73 9.46 10.92L9.46 10.99L10.37 10.99Q11.06 10.99 11.28 11.02Q11.64 11.04 11.82 11.16Q12.00 11.28 12.14 11.59L12.17 11.62Q12.22 11.71 12.23 11.78Q12.24 11.86 12.24 12.00Q12.24 12.41 11.95 12.70Q11.71 12.94 11.42 12.98Q11.35 13.01 10.18 13.01L9.24 13.01Q9.10 13.03 9.07 13.06Q9.00 13.18 8.78 14.66Q8.50 16.56 8.30 17.54Q7.97 19.27 7.63 20.09Q6.77 22.18 4.94 21.98Q3.94 21.89 3.22 21.22Q2.59 20.64 2.36 19.85Q2.14 19.06 2.35 18.55Q2.42 18.41 2.57 18.26Q2.86 18.00 3.24 18.00Q3.70 18.00 3.97 18.34Q4.25 18.67 4.25 19.06ZM15.02 11.02Q14.64 11.11 14.41 11.45Q14.18 11.78 14.26 12.17Q14.30 12.36 14.38 12.48Q14.45 12.60 14.71 12.86L16.80 15.00L14.71 17.14Q14.45 17.40 14.38 17.52Q14.30 17.64 14.26 17.83Q14.21 18.14 14.36 18.43Q14.52 18.72 14.81 18.88Q15.10 19.03 15.41 18.98L15.43 18.98Q15.60 18.94 15.72 18.88Q15.84 18.82 16.13 18.53L17.04 17.64L18.24 16.44L20.38 18.53Q20.64 18.79 20.76 18.86Q20.88 18.94 21.07 18.98Q21.58 19.06 21.94 18.71Q22.30 18.36 22.22 17.83Q22.18 17.64 22.10 17.52Q22.03 17.40 21.77 17.14L19.68 15.00L21.77 12.86Q22.03 12.60 22.10 12.48Q22.18 12.36 22.22 12.17Q22.27 11.86 22.12 11.57Q21.96 11.28 21.67 11.12Q21.38 10.97 21.07 11.02Q20.88 11.06 20.76 11.14Q20.64 11.21 20.38 11.47L18.24 13.56L17.04 12.36L16.13 11.47Q15.84 11.18 15.72 11.12Q15.60 11.06 15.43 11.02L15.38 11.02Q15.14 10.97 15.02 11.02Z"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
     <filter id="wob" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.38" numOctaves="2" seed="3" result="n"/><feDisplacementMap id="wobmap" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>
     <filter id="grain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="7" result="g"/><feDisplacementMap in="SourceGraphic" in2="g" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
@@ -687,14 +738,14 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 <header class="nav" id="nav">
   <div class="bar">
     <div class="bar-sh" aria-hidden="true"><div class="bar-bg"><svg class="wave" focusable="false"><path class="wv-t" pathLength="1"/><path class="wv-f" pathLength="1"/></svg></div></div>
-    <a class="lockup" href="#top"><img src="../assets/icon.png" width="180" height="180" alt=""><span><b>Syllabo</b><span class="sub" aria-hidden="true"><span>Study app for the IB Diploma</span></span><span class="sr">, study app for the IB Diploma</span></span></a>
+    <a class="lockup" href="#top"><span class="lk-icon"><img src="../assets/icon.png" width="180" height="180" alt=""></span><span class="lk-txt"><span class="lk-word" aria-hidden="true"><i style="--j:0">S</i><i style="--j:1">Y</i><i style="--j:2">L</i><i style="--j:3">L</i><i style="--j:4">A</i><i style="--j:5">B</i><i style="--j:6">O</i><svg class="lk-spark" viewBox="0 0 40 40" focusable="false"><path d="M20 2Q23 17 38 20 23 23 20 38 17 23 2 20 17 17 20 2Z"/></svg></span><span class="sub" aria-hidden="true"><span>IB Diploma study app</span></span><span class="sr">Syllabo, study app for the IB Diploma</span></span></a>
     <nav class="links" aria-label="Main">
       <svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path pathLength="1" d="M84 7C70 2 30 1.5 13 8 1 13 1.5 27 15 33 33 40 72 39.5 88 33 99 28.5 99.5 14 85 8 76 4.5 58 5.5 42 10"/></svg>
-      <a class="l-eyes" href="#product" data-sec="product"><svg class="ico" viewBox="0 0 26 24" aria-hidden="true" focusable="false"><g class="eye"><path d="M7.4 2.6C4.3 2.7 2.8 7.2 3 12.2c.2 5.2 1.9 8.9 4.6 8.8 2.8-.1 4.4-4.2 4.2-9.3C11.6 6.7 10.2 2.5 7.4 2.6Z"/><circle class="pu" cx="7.5" cy="12" r="2.4"/></g><g class="eye"><path d="M18.6 2.9c-2.9 0-4.3 4.2-4.2 9.2.1 5.1 1.7 8.9 4.4 8.8 2.8-.1 4.4-4.2 4.2-9.2-.2-4.9-1.6-8.8-4.4-8.8Z"/><circle class="pu" cx="18.7" cy="12" r="2.4"/></g></svg><span class="lbl">Product</span></a>
+      <a class="l-eyes" href="#product" data-sec="product"><svg class="ico" viewBox="0 0 30 22" aria-hidden="true" focusable="false"><g class="eye"><path d="M8 1.4C3.9 1.5 1.6 5.6 1.8 11.2c.2 5.6 2.6 9.5 6.4 9.4 3.9-.1 6.1-4.4 5.9-10C13.9 5.2 11.8 1.3 8 1.4Z"/><circle class="pu" cx="7.9" cy="11" r="2.9"/></g><g class="eye"><path d="M22.1 1.6c-4 0-6 4.2-5.9 9.6.1 5.5 2.4 9.4 6.2 9.3 3.9-.1 6-4.3 5.8-9.8-.2-5.3-2.3-9.1-6.1-9.1Z"/><circle class="pu" cx="22.2" cy="11" r="2.9"/></g></svg><span class="lbl">Product</span></a>
       <a class="l-bolt knock" href="#compete" data-sec="compete"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.8 2.2 5.6 13.4l6.1.2-2.3 8.3 9.1-12.1-6.3-.1 1.6-7.5Z"/></svg><span class="lbl">Compete</span></a>
       <a class="l-star" href="#how" data-sec="how"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.2 2.8c-.2 6.1-.1 12.3.1 18.5M4.2 7.6c5.2 2.9 10.4 5.9 15.6 8.9M19.6 7.2c-5.1 3.1-10.3 6.2-15.4 9.3" stroke-width="2.2"/></svg><span class="lbl">How it works</span></a>
       <a class="l-heart" href="#pricing" data-sec="pricing"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.1 20.4C7 17 3.1 13.6 3.3 9 3.4 5.9 5.6 3.9 8.2 4c1.8.1 3.1 1.3 3.9 3 .8-1.8 2.3-3 4.2-3 2.6 0 4.6 2.2 4.4 5.2-.2 4.5-4 7.9-8.6 11.2Z"/></svg><span class="lbl">Pricing</span></a>
-      <a class="l-arrow" href="../../support.html"><span class="lbl">Support</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="shaft" d="M2.5 13c3 0 5.5-.6 8-3.4 1.6-1.9-.9-3.9-2.1-1.8-1.4 2.6 1.5 5.2 6 5.2h5"/><path class="head" d="M16.4 9.6 19.6 13l-3.4 3.2"/></svg></a>
+      <a class="l-arrow" href="support.html"><span class="lbl">Support</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="shaft" d="M2.5 13c3 0 5.5-.6 8-3.4 1.6-1.9-.9-3.9-2.1-1.8-1.4 2.6 1.5 5.2 6 5.2h5"/><path class="head" d="M16.4 9.6 19.6 13l-3.4 3.2"/></svg></a>
     </nav>
     <div class="nav-end">
       <a class="nav-cta mag" href="https://apps.apple.com/app/syllabo/id6810865998">Get the app <span class="arrbox"><svg class="a1" aria-hidden="true"><use href="#i-ne"/></svg><svg class="a2" aria-hidden="true"><use href="#i-ne"/></svg></span></a>
@@ -708,7 +759,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
     <a href="#compete" data-sec="compete" style="--i:1"><span class="n">02</span>Compete</a>
     <a href="#how" data-sec="how" style="--i:2"><span class="n">03</span>How it works</a>
     <a href="#pricing" data-sec="pricing" style="--i:3"><span class="n">04</span>Pricing</a>
-    <a href="../../support.html" style="--i:4"><span class="n">05</span>Support</a>
+    <a href="support.html" style="--i:4"><span class="n">05</span>Support</a>
   </nav>
   <a class="appstore" href="https://apps.apple.com/app/syllabo/id6810865998"><svg aria-hidden="true"><use href="#i-apple"/></svg><span><small>Download on the</small><b>App Store</b></span></a>
   <p class="fine">iPhone, iPad and Mac. Free, AI tutor included. No ads, no tracking.</p>
@@ -732,21 +783,20 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
     <div class="field" id="field">
       <div class="orbit" id="orbit">
         <a class="card tile c-flash" href="#inside-learn" draggable="false" data-ph style="--a:0deg;--pa:0deg;--t:-4"><span class="shd"></span><span class="face"><span class="lab">Flashcard</span><span class="q">What is a limiting reagent?</span><span class="sheen"></span></span><span class="cap">Flashcards <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-streak" href="#inside-buddy" draggable="false" data-ph style="--a:22.5deg;--pa:36deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-flame"/></svg>12-day streak<span class="sheen"></span></span><span class="cap">Keep your streak <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card c-badge" href="#leagues" draggable="false" data-ph style="--a:45deg;--pa:72deg;--t:-2;--w:150"><span class="shd"></span><span class="face"><img src="../assets/ranks/gold-2.png" width="320" height="320" alt="" draggable="false"></span><span class="cap">Weekly leagues <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-coin" href="#compete" draggable="false" style="--a:67.5deg;--t:4"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-coin"/></svg>+12 coins<span class="sheen"></span></span><span class="cap">Study coins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-code" href="#inside-points" draggable="false" data-ph style="--a:90deg;--pa:108deg;--t:-3"><span class="shd"></span><span class="face"><b>R1.1</b>Enthalpy<span class="sheen"></span></span><span class="cap">Syllabus points <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card xp" href="#compete" draggable="false" data-ph style="--a:112.5deg;--pa:144deg;--t:4;z-index:20"><span class="face"><svg aria-hidden="true"><use href="#i-star"/></svg>+40 XP</span><span class="cap">XP and coins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tile c-timer" href="#inside-practice" draggable="false" style="--a:135deg;--t:-4"><span class="shd"></span><span class="face"><span class="lab">Session</span><b>15 min</b><span class="sl"></span><span class="ticks"><span>5</span><span>60</span></span><span class="sheen"></span></span><span class="cap">Quick sessions <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-ok" href="#inside-practice" draggable="false" data-ph style="--a:157.5deg;--pa:180deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-ok"/></svg>Correct<span class="sheen"></span></span><span class="cap">Practice <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card c-grade" href="#inside-marking" draggable="false" data-ph style="--a:180deg;--pa:216deg;--t:-2"><span class="shd"></span><span class="face"><small>Grade</small><b>7</b><span class="sheen"></span></span><span class="cap">Marking <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card c-stamp" href="#inside-marking" draggable="false" style="--a:202.5deg;--t:5"><span class="shd"></span><span class="face">2/3 marks</span><span class="cap">Marked point by point <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card ringw" href="#rings" draggable="false" data-ph style="--a:225deg;--pa:252deg;--t:-3;--w:150;--h:170"><span class="shd"></span><span class="face"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#E9F6EC" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="#3FB950" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100"/><circle cx="50" cy="50" r="29" fill="none" stroke="#E6EEFC" stroke-width="10"/><circle cx="50" cy="50" r="29" fill="none" stroke="#6A9BEF" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="78 100"/><circle cx="50" cy="50" r="16" fill="none" stroke="#FFF4D6" stroke-width="10"/><circle cx="50" cy="50" r="16" fill="none" stroke="#FFC93C" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="55 100"/></svg>Daily rings<span class="sheen"></span></span><span class="cap">Close your rings <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card c-badge" href="#leagues" draggable="false" style="--a:247.5deg;--t:2;--w:168"><span class="shd"></span><span class="face"><img src="../assets/ranks/luminary.png" width="320" height="320" alt="" loading="lazy" draggable="false"></span><span class="cap">Climb to Luminary <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tile c-duel" href="#duels" draggable="false" style="--a:270deg;--t:-4"><span class="shd"></span><span class="face"><span class="lab">Duel</span><b><i>9</i> – 6</b><span class="who">You vs Noor</span><span class="sheen"></span></span><span class="cap">Duels <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-crate" href="#skins" draggable="false" data-ph style="--a:292.5deg;--pa:288deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-crate"/></svg>Crate unlocked<span class="sheen"></span></span><span class="cap">Crates and skins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-test" href="#inside-practice" draggable="false" style="--a:315deg;--t:-2"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-cal"/></svg>Unit 3 test<span class="dim">· 4 days</span><span class="sheen"></span></span><span class="cap">Upcoming test topics <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
-        <a class="card tok c-subj" href="#subjects" draggable="false" data-ph style="--a:337.5deg;--pa:324deg;--t:4"><span class="shd"></span><span class="face">Biology <b>HL</b><span class="sheen"></span></span><span class="cap">IB subjects <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-streak" href="#inside-buddy" draggable="false" data-ph style="--a:24deg;--pa:36deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-flame"/></svg>12-day streak<span class="sheen"></span></span><span class="cap">Keep your streak <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card c-badge" href="#leagues" draggable="false" data-ph style="--a:48deg;--pa:72deg;--t:-2;--w:150"><span class="shd"></span><span class="face"><img src="../assets/ranks/gold-2.png" width="320" height="320" alt="Gold league badge" draggable="false"></span><span class="cap">Weekly leagues <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-coin" href="#compete" draggable="false" style="--a:72deg;--t:4"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-coin"/></svg>+12 coins<span class="sheen"></span></span><span class="cap">Study coins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-code" href="#inside-points" draggable="false" data-ph style="--a:96deg;--pa:108deg;--t:-3"><span class="shd"></span><span class="face"><b>R1.1</b>Enthalpy<span class="sheen"></span></span><span class="cap">Syllabus points <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card xp" href="#compete" draggable="false" data-ph style="--a:120deg;--pa:144deg;--t:4;z-index:20"><span class="face"><svg aria-hidden="true"><use href="#i-star"/></svg>+40 XP</span><span class="cap">XP and coins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tile c-timer" href="#inside-practice" draggable="false" style="--a:144deg;--t:-4"><span class="shd"></span><span class="face"><span class="lab">Session</span><b>15 min</b><span class="sl"></span><span class="ticks"><span>5</span><span>60</span></span><span class="sheen"></span></span><span class="cap">Quick sessions <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-ok" href="#inside-practice" draggable="false" data-ph style="--a:168deg;--pa:180deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-ok"/></svg>Correct<span class="sheen"></span></span><span class="cap">Practice <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card c-grade" href="#inside-marking" draggable="false" data-ph style="--a:192deg;--pa:216deg;--t:-2"><span class="shd"></span><span class="face"><small>Grade</small><b>7</b><span class="sheen"></span></span><span class="cap">Marking <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card c-stamp" href="#inside-marking" draggable="false" style="--a:216deg;--t:5"><span class="shd"></span><span class="face">2/3 marks</span><span class="cap">Marked point by point <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card ringw" href="#rings" draggable="false" data-ph style="--a:240deg;--pa:252deg;--t:-3;--w:150;--h:170"><span class="shd"></span><span class="face"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#E9F6EC" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="#3FB950" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="100 100"/><circle cx="50" cy="50" r="29" fill="none" stroke="#E6EEFC" stroke-width="10"/><circle cx="50" cy="50" r="29" fill="none" stroke="#6A9BEF" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="78 100"/><circle cx="50" cy="50" r="16" fill="none" stroke="#FFF4D6" stroke-width="10"/><circle cx="50" cy="50" r="16" fill="none" stroke="#FFC93C" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="55 100"/></svg>Daily rings<span class="sheen"></span></span><span class="cap">Close your rings <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tile c-duel" href="#duels" draggable="false" style="--a:264deg;--t:-4"><span class="shd"></span><span class="face"><span class="lab">Duel</span><b><i>9</i> – 6</b><span class="who">You vs Noor</span><span class="sheen"></span></span><span class="cap">Duels <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-crate" href="#skins" draggable="false" data-ph style="--a:288deg;--pa:288deg;--t:3"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-crate"/></svg>Daily crate<span class="sheen"></span></span><span class="cap">Crates and skins <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-test" href="#inside-practice" draggable="false" style="--a:312deg;--t:-2"><span class="shd"></span><span class="face"><svg aria-hidden="true"><use href="#i-cal"/></svg>Unit 3 test<span class="dim">· 4 days</span><span class="sheen"></span></span><span class="cap">Upcoming test topics <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
+        <a class="card tok c-subj" href="#subjects" draggable="false" data-ph style="--a:336deg;--pa:324deg;--t:4"><span class="shd"></span><span class="face">Biology <b>HL</b><span class="sheen"></span></span><span class="cap">IB subjects <svg aria-hidden="true"><use href="#i-ne"/></svg></span></a>
       </div>
       <div class="doodles back" aria-hidden="true">
         <svg class="dd" viewBox="0 0 100 100" style="width:8vw;left:-41vw;top:-15vw;filter:url(#grain)"><g class="rock"><path pathLength="1" d="M50 7 61 37 94 39 68 58 78 91 50 71 22 91 32 58 6 39 39 37Z" stroke="#2F63D6" stroke-width="4.5"/></g></svg>
@@ -876,7 +926,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
         </div>
         <div class="dc-vis">
           <img class="bgimg" src="../assets/scenes/astronaut.jpg" width="900" height="900" alt="" loading="lazy">
-          <img class="skin px" src="../assets/skins/astronaut.png" width="256" height="256" alt="Pip in the Astronaut skin" loading="lazy">
+          <img class="dc-skin px" src="../assets/skins/astronaut.png" width="256" height="256" alt="Pip in the Astronaut skin" loading="lazy">
           <div class="phone"><img src="../assets/shots/buddy.jpg" width="644" height="1400" alt="Buddy tab with a skin and its illustrated background" loading="lazy"></div>
         </div>
       </article>
@@ -989,9 +1039,9 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
       <h3>Five minutes a subject.</h3>
       <p class="body">A ring for each subject you are focusing on, closed by minutes studied or points practised. Close them all for coins and a crate, keep it up for a perfect week, and hold the flame to start today's session and keep your streak alive.</p>
       <div class="ring-row" id="ring-row">
-        <figure class="ring" style="--c:#3FB950"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><figcaption><b>Biology</b>5 of 5 min</figcaption></figure>
-        <figure class="ring" style="--c:#6A9BEF"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><figcaption><b>Chemistry</b>5 of 5 min</figcaption></figure>
-        <figure class="ring" style="--c:#FFC93C"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><figcaption><b>Mathematics</b>5 of 5 min</figcaption></figure>
+        <figure class="ring" style="--c:#46C37C"><span class="rg"><svg class="rsv" viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><svg class="glyph" aria-hidden="true"><use href="#i-bio"/></svg></span><figcaption><b>Biology</b>5 of 5 min</figcaption></figure>
+        <figure class="ring" style="--c:#2BB2D7"><span class="rg"><svg class="rsv" viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><svg class="glyph" aria-hidden="true"><use href="#i-chem"/></svg></span><figcaption><b>Chemistry</b>5 of 5 min</figcaption></figure>
+        <figure class="ring" style="--c:#9266DE"><span class="rg"><svg class="rsv" viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="50"/><circle class="val" cx="60" cy="60" r="50" pathLength="100"/></svg><svg class="glyph" aria-hidden="true"><use href="#i-math"/></svg></span><figcaption><b>Mathematics</b>5 of 5 min</figcaption></figure>
       </div>
       <p class="ring-note"><span>Close every ring today</span><b>+100 coins + a crate</b></p>
     </article>
@@ -1012,7 +1062,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
     <div class="sec-label"><p><i></i>06 / What is included</p><p>Free • No ads • No tracking</p></div>
     <h2 id="inc-h" class="disp rise">What is included</h2>
     <p class="yc fade">Everything below comes in one free app for iPhone, iPad and Mac: sessions planned from your weak spots, exam-format questions marked point by point, a tutor that knows where you are, a buddy that keeps your streak, and leagues you climb only by studying.</p>
-    <div class="stats" aria-label="Syllabo in numbers">
+    <div class="stats" role="group" aria-label="Syllabo in numbers">
       <div><b data-count="29">29</b><span>IB subjects</span></div>
       <div><b data-count="53000" data-plus>53,000+</b><span>Questions</span></div>
       <div><b data-count="1000" data-plus>1,000+</b><span>Glossary terms</span></div>
@@ -1025,7 +1075,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Only upcoming test topics</b>Any question mode can be scoped to what your next test covers.</span></li>
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Concept search</b>Find a lesson inside a subject by title, code, key term or objective.</span></li>
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Saved-question folders</b>Bookmark while practising, sort by marks, type or topic, replay a folder as a session.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Past-paper library</b>Exam-format questions with paper, marks and source. Import your school's licensed papers with one script.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Past-paper library</b>Exam-format questions with paper, marks and source. Paste in questions from your school's licensed papers.</span></li>
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Marking</b>AI marking and examiner-style feedback, free, with on-device marking when you are offline.</span></li>
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Essay workshop</b>On iPad and Mac: plan, write and get marked against subject rubrics.</span></li>
       <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Exam countdown</b>Tests with their topics; the app prompts you to revise the least practised one.</span></li>
@@ -1071,7 +1121,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
         <ul>
           <li><svg aria-hidden="true"><use href="#i-check-g"/></svg>Extras for students who want more, on top of everything in the free app</li>
           <li><svg aria-hidden="true"><use href="#i-check-g"/></svg>Details and pricing to be announced</li>
-          <li><svg aria-hidden="true"><use href="#i-check-g"/></svg><span>Have an idea for what it should include? <a class="inline ul" href="mailto:syllabosupport@gmail.com?subject=Syllabo%20paid%20plan%20idea">Tell us</a></span></li>
+          <li><svg aria-hidden="true"><use href="#i-check-g"/></svg><span>Have an idea for what it should include? <a class="inline" href="mailto:syllabosupport@gmail.com?subject=Syllabo%20paid%20plan%20idea">Tell us</a></span></li>
         </ul>
       </article>
     </div>
@@ -1085,10 +1135,10 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
     <div class="faq-grid">
       <h2 id="faq-h" class="disp rise">Questions</h2>
       <div class="qs">
-        <details><summary>Are these real IB past papers?<i aria-hidden="true"></i></summary><div class="a"><p>The app ships original questions written in IB paper format with mark schemes. Real papers are IBO copyright, so they are not bundled. If your school gives you access to past papers, the included import tool converts a paper plus mark scheme into the app in one command, and they appear with their session, paper and question reference.</p></div></details>
-        <details><summary>Is the AI tutor really free?<i aria-hidden="true"></i></summary><div class="a"><p>Yes. The AI tutor and AI marking are included at no cost, with a daily allowance to keep things fair for everyone. They need an online account, and you can turn AI off at any time in Settings.</p></div></details>
+        <details><summary>Are these real IB past papers?<i aria-hidden="true"></i></summary><div class="a"><p>The app ships original questions written in IB paper format with mark schemes. Real papers are IBO copyright, so they are not bundled. If your school gives you access to past papers, you can type or paste their questions in under Learn &rsaquo; subject &rsaquo; Saved questions. Tag each one with its syllabus points and marks, and it appears in your sessions, where the tutor can mark it against your mark scheme.</p></div></details>
+        <details><summary>Is the AI tutor really free?<i aria-hidden="true"></i></summary><div class="a"><p>Yes. The AI tutor and AI marking are included at no cost, with a daily allowance to keep things fair for everyone. They need a free online account (a new install gets its first day as a guest), and you can turn AI off at any time in Settings.</p></div></details>
         <details><summary>Does it work without an internet connection?<i aria-hidden="true"></i></summary><div class="a"><p>Mostly. Practice, flashcards, lessons, your progress and on-device marking all work offline. The AI tutor and AI marking need a connection, and marking falls back to the on-device version when you are offline.</p></div></details>
-        <details><summary>Where is my data stored?<i aria-hidden="true"></i></summary><div class="a"><p>Your study data lives on your device. If you create an online account, a backup is kept with our database provider, Supabase, so you can sign in on another device and add friends. Messages to the AI tutor and answers sent for AI marking go to Anthropic's Claude through our server, which does not keep them. The <a href="../../privacy.html">privacy policy</a> has the details.</p></div></details>
+        <details><summary>Where is my data stored?<i aria-hidden="true"></i></summary><div class="a"><p>Your study data lives on your device. If you create an online account, a backup is kept with our database provider, Supabase, so you can sign in on another device and add friends. Messages to the AI tutor and answers sent for AI marking go to Anthropic's Claude through our server, which does not keep them. The <a href="privacy.html">privacy policy</a> has the details.</p></div></details>
         <details><summary>Which subjects are covered?<i aria-hidden="true"></i></summary><div class="a"><p>29 IB Diploma subjects across Groups 1 to 5, each with its official syllabus outline and practice questions: more than 53,000 in all. Both maths courses, the sciences, Economics, Global Politics, Business Management, Psychology and SEHS have the deepest banks, with dozens of questions on every syllabus point, and the rest grow with each update. The arts are not included, because they are assessed through practical work and portfolios rather than exam questions.</p></div></details>
         <details><summary>Is it affiliated with the IB?<i aria-hidden="true"></i></summary><div class="a"><p>No. "International Baccalaureate" and "IB" are trademarks of the International Baccalaureate Organization, which does not endorse this app.</p></div></details>
       </div>
@@ -1114,10 +1164,10 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 
 <footer class="site-foot" id="footer-nav">
   <div class="fcols">
-    <div><a class="brand" href="#top"><img src="../assets/icon.png" width="180" height="180" alt="" loading="lazy">Syllabo</a><p>A personal study app for the IB Diploma. Built in Singapore for the minutes between everything else.</p></div>
+    <div><a class="brand" href="#top"><span class="lk-icon"><img src="../assets/icon.png" width="180" height="180" alt="" loading="lazy"></span><span class="lk-word" aria-hidden="true">SYLLABO<svg class="lk-spark" viewBox="0 0 40 40" focusable="false"><path d="M20 2Q23 17 38 20 23 23 20 38 17 23 2 20 17 17 20 2Z"/></svg></span><span class="sr">Syllabo</span></a><p>A personal study app for the IB Diploma. Built in Singapore for the minutes between everything else.</p></div>
     <nav aria-labelledby="fh-p"><h2 class="fh" id="fh-p">Product</h2><ul><li><a class="ul" href="#product">Features</a></li><li><a class="ul" href="#compete">Leagues and duels</a></li><li><a class="ul" href="#how">How it works</a></li><li><a class="ul" href="#pricing">Pricing</a></li><li><a class="ul" href="#faq">FAQ</a></li></ul></nav>
-    <nav aria-labelledby="fh-l"><h2 class="fh" id="fh-l">Legal</h2><ul><li><a class="ul" href="../../privacy.html">Privacy policy</a></li><li><a class="ul" href="../../terms.html">Terms of use</a></li></ul></nav>
-    <div><h2 class="fh">Contact</h2><ul><li><a class="ul" href="../../support.html">Support</a></li><li><a class="ul" href="mailto:syllabosupport@gmail.com">syllabosupport@gmail.com</a></li></ul></div>
+    <nav aria-labelledby="fh-l"><h2 class="fh" id="fh-l">Legal</h2><ul><li><a class="ul" href="privacy.html">Privacy policy</a></li><li><a class="ul" href="terms.html">Terms of use</a></li></ul></nav>
+    <div><h2 class="fh">Contact</h2><ul><li><a class="ul" href="support.html">Support</a></li><li><a class="ul" href="mailto:syllabosupport@gmail.com">syllabosupport@gmail.com</a></li></ul></div>
   </div>
   <div class="giant-clip">
     <div class="giant disp" id="giant" aria-hidden="true"><span><span class="gl">S</span></span><span><span class="gl">Y</span></span><span class="perch"><span class="gl">L</span><span class="prop p-icon" style="--i:0"><img src="../assets/icon.png" width="180" height="180" alt="" loading="lazy"></span></span><span><span class="gl">L</span></span><span class="perch"><span class="gl">A</span><span class="prop p-xp" style="--i:1"><span class="xpc"><svg><use href="#i-star"/></svg>+40 XP</span></span></span><span class="perch"><span class="gl">B</span><span class="prop p-coin" style="--i:2"><svg viewBox="0 0 24 24"><use href="#i-coin"/></svg></span></span><span class="perch"><span class="gl">O</span><span class="prop p-star" style="--i:3"><svg viewBox="0 0 100 100"><path d="M50 7 61 37 94 39 68 58 78 91 50 71 22 91 32 58 6 39 39 37Z"/></svg></span></span></div>
@@ -1131,7 +1181,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 const d=document,root=d.documentElement,$=(s,c=d)=>c.querySelector(s),$$=(s,c=d)=>Array.from(c.querySelectorAll(s));
 const mq=q=>matchMedia(q);
 const mReduce=mq('(prefers-reduced-motion: reduce)'),mFine=mq('(hover: hover) and (pointer: fine)'),mPhone=mq('(max-width: 759px)');
-const mPin=mq('(min-width: 1100px) and (min-height: 720px) and (prefers-reduced-motion: no-preference)'),mHeroPin=mq('(min-width: 760px) and (prefers-reduced-motion: no-preference)');
+const mPin=mq('(min-width: 1100px) and (min-height: 720px) and (prefers-reduced-motion: no-preference)'),mHeroPin=mq('(min-width: 760px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)');
 const reduced=mReduce.matches;
 const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t,damp=(dt,k)=>1-Math.exp(-dt*k);
 const eIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,eOut=t=>1-Math.pow(1-t,3),eIn=t=>t*t;
@@ -1151,8 +1201,8 @@ $('#skin-grid').innerHTML=SK.map((s,i)=>{const n=s==='dj'?'DJ':s[0].toUpperCase(
 
 /* ---------- nav: islands that merge, a marker circle on the current link, rolling letters, progress wave, tuck ---------- */
 const navEl=$('#nav'),bar=$('.bar',navEl),links=$('.links',navEl),navA=$$('.links a[data-sec]'),sheetA=$$('#sheet a[data-sec]');
-const circ=$('.circ',links),circP=$('path',circ),sub=$('.sub',navEl),wave=$('.wave',navEl),wvT=$('.wv-t',navEl),wvF=$('.wv-f',navEl);
-const SUB0='Study app for the IB Diploma',CIRC_COLS=['#2F63D6','#7C6CF0','#F0524F','#E7B400'];
+const circ=$('.circ',links),circP=$('path',circ),sub=$('.sub',navEl),lkSpark=$('.lk-spark',navEl),wave=$('.wave',navEl),wvT=$('.wv-t',navEl),wvF=$('.wv-f',navEl);
+const SUB0='IB Diploma study app',CIRC_COLS=['#2F63D6','#7C6CF0','#F0524F','#E7B400'];
 /* sections in page order; the one holding the middle of the viewport is current, and a later entry wins (#deck sits inside #product) */
 const SECS=[['top'],['subjects','01','Subjects'],['product','02','The idea'],['deck','03','Inside Syllabo'],['how','04','How it works'],['compete','05','Compete'],['included','06','What is included'],['pricing','07','Pricing'],['faq','08','Questions'],['download','09','Get Syllabo']].map(([id,n,t])=>({id,n,t,el:d.getElementById(id),top:0}));
 const LINK_OF={product:'product',deck:'product',how:'how',compete:'compete',pricing:'pricing'};
@@ -1166,8 +1216,11 @@ function measureNav(){
   const ww=Math.max(bar.clientWidth-44,10),n=Math.max(2,Math.round(ww/11)),st=ww/n;let p='M0 4';
   for(let i=0;i<n;i++)p+='q'+(st/2).toFixed(2)+' '+(i%2?3.6:-3.6)+' '+st.toFixed(2)+' 0';
   wave.setAttribute('viewBox','0 0 '+ww.toFixed(1)+' 8');wvT.setAttribute('d',p);wvF.setAttribute('d',p);
-  if(sub){const t=d.createElement('span');t.textContent=SUB0;t.style.visibility='hidden';sub.appendChild(t);sub.style.width=Math.ceil(t.offsetWidth+1)+'px';t.remove()}
+  if(sub){const t=d.createElement('span');t.style.visibility='hidden';t.style.right='auto';sub.appendChild(t);let mw=0;[SUB0,...SECS.filter(x=>x.n).map(x=>x.n+' · '+x.t)].forEach(x=>{t.textContent=x;mw=Math.max(mw,t.offsetWidth)});sub.style.width=Math.ceil(mw+1)+'px';t.remove()}
   if(navLink)placeCirc(navLink);
+  /* the uncurled Support arrow reaches across to just short of the Get the app button */
+  const ai=arrA&&$('.ico',arrA),cta=$('.nav-cta',navEl);
+  if(ai&&cta&&W>=960){const a=ai.getBoundingClientRect(),c=cta.getBoundingClientRect();arrLen=c.width?clamp(c.left-a.left-18,40,240):44}
 }
 function placeCirc(a){circ.style.left=(a.offsetLeft-7)+'px';circ.style.top=(a.offsetTop-4)+'px';circ.style.width=(a.offsetWidth+14)+'px';circ.style.height=(a.offsetHeight+8)+'px'}
 /* the marker circle wipes off the old link, then draws itself around the new one in the next ink colour */
@@ -1193,6 +1246,7 @@ function rollSub(sec,dir,first){
   const e='cubic-bezier(.22,1,.36,1)';
   cur.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY('+(-dir*100)+'%)',opacity:0}],{duration:520,easing:e,fill:'forwards'}).onfinish=()=>cur.remove();
   nw.animate([{transform:'translateY('+(dir*100)+'%)',opacity:0},{transform:'none',opacity:1}],{duration:660,easing:e});
+  if(lkSpark)lkSpark.animate([{transform:'none'},{transform:'rotate('+(dir*180)+'deg) scale(1.45)',offset:.45},{transform:'rotate('+(dir*360)+'deg)'}],{duration:900,easing:'cubic-bezier(.34,1.45,.64,1)'});
 }
 function setTuck(v){if(v!==tucked){tucked=v;navEl.classList.toggle('tuck',v)}}
 function navUpd(){
@@ -1211,8 +1265,8 @@ addEventListener('pointermove',e=>{if(tucked&&e.pointerType==='mouse'&&e.clientY
 
 /* Product: googly eyes that follow the pointer, and blink now and then */
 const pupils=$$('.l-eyes .pu'),eyeSvg=$('.l-eyes .ico');let eyeRaf=0,eyeX=0,eyeY=0;
-function lookEyes(){eyeRaf=0;const r=eyeSvg.getBoundingClientRect();if(!r.width)return;const sc=r.width/26;
-  pupils.forEach(p=>{const cx=r.left+(+p.getAttribute('cx'))*sc,cy=r.top+12*sc,dx=eyeX-cx,dy=eyeY-cy,dist=Math.hypot(dx,dy)||1,f=Math.min(dist/140,1);p.setAttribute('transform','translate('+(dx/dist*1.6*f).toFixed(2)+' '+(dy/dist*5*f).toFixed(2)+')')})}
+function lookEyes(){eyeRaf=0;const r=eyeSvg.getBoundingClientRect();if(!r.width)return;const sc=r.width/30;
+  pupils.forEach(p=>{const cx=r.left+(+p.getAttribute('cx'))*sc,cy=r.top+11*sc,dx=eyeX-cx,dy=eyeY-cy,dist=Math.hypot(dx,dy)||1,f=Math.min(dist/70,1);p.setAttribute('transform','translate('+(dx/dist*2.9*f).toFixed(2)+' '+(dy/dist*5.6*f).toFixed(2)+')')})}
 if(pupils.length&&!reduced){
   addEventListener('pointermove',e=>{eyeX=e.clientX;eyeY=e.clientY;if(!eyeRaf)eyeRaf=requestAnimationFrame(lookEyes)},{passive:true});
   const blink=()=>setTimeout(()=>{if(!tucked&&W>=1180&&!d.hidden)$$('.l-eyes .eye').forEach(g=>g.animate([{transform:'scaleY(1)'},{transform:'scaleY(.1)',offset:.45},{transform:'scaleY(1)'}],{duration:190,easing:'ease-in-out'}));blink()},2800+Math.random()*4400);
@@ -1244,16 +1298,16 @@ if(knockA&&!reduced){
   knockA.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hit()});
 }
 /* Support: the curly arrow uncurls into a long straight one on hover (a sprung tween between the two shapes) */
-const arrA=$('.links a.l-arrow'),arrS=arrA&&$('.shaft',arrA),arrH=arrA&&$('.head',arrA);let arrU=0,arrV=0,arrOn=false,arrRun=false,arrT=0;
+const arrA=$('.links a.l-arrow'),arrS=arrA&&$('.shaft',arrA),arrH=arrA&&$('.head',arrA);let arrU=0,arrV=0,arrOn=false,arrRun=false,arrT=0,arrLen=44;
 function drawArr(u){
   const N=30,pts=[],f=p=>p[0].toFixed(2)+' '+p[1].toFixed(2);
-  for(let i=0;i<=N;i++){const t=i/N,lu=clamp((t-.2)/.5,0,1),a=TAU*lu;pts.push([lerp(2.5+17*t+4.2*Math.sin(a),2.5+42*t,u),lerp(13-4.2*(1-Math.cos(a))+.8*Math.sin(Math.PI*t),12.5,u)])}
+  for(let i=0;i<=N;i++){const t=i/N,lu=clamp((t-.2)/.5,0,1),a=TAU*lu;pts.push([Math.min(lerp(2.5+17*t+4.2*Math.sin(a),2.5+(arrLen-2.5)*t,u),arrLen+3),lerp(13-4.2*(1-Math.cos(a))+.8*Math.sin(Math.PI*t),12.5,u)])}
   let p='M'+f(pts[0]);for(let i=1;i<N;i++)p+='Q'+f(pts[i])+' '+f([(pts[i][0]+pts[i+1][0])/2,(pts[i][1]+pts[i+1][1])/2]);p+='L'+f(pts[N]);
   arrS.setAttribute('d',p);
   const E=pts[N],B=pts[N-3],th=Math.atan2(E[1]-B[1],E[0]-B[0]),h=4.4,w=.7;
   arrH.setAttribute('d','M'+f([E[0]-h*Math.cos(th-w),E[1]-h*Math.sin(th-w)])+'L'+f(E)+'L'+f([E[0]-h*Math.cos(th+w),E[1]-h*Math.sin(th+w)]));
 }
-function arrStep(now){const dt=Math.min((now-arrT)/1000,.034);arrT=now;const tg=arrOn?1:0;arrV+=(170*(tg-arrU)-15*arrV)*dt;arrU+=arrV*dt;
+function arrStep(now){const dt=clamp((now-arrT)/1000,0,.034);arrT=now;const tg=arrOn?1:0;arrV+=(170*(tg-arrU)-15*arrV)*dt;arrU+=arrV*dt;
   if(Math.abs(tg-arrU)<.001&&Math.abs(arrV)<.002){arrU=tg;arrRun=false;drawArr(arrU);return}drawArr(arrU);requestAnimationFrame(arrStep)}
 function arrGo(on){arrOn=on;if(reduced){arrU=on?1:0;drawArr(arrU);return}if(!arrRun){arrRun=true;arrT=performance.now();requestAnimationFrame(arrStep)}}
 if(arrA){drawArr(0);arrA.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')arrGo(true)});arrA.addEventListener('pointerleave',()=>arrGo(false));arrA.addEventListener('focus',()=>arrGo(true));arrA.addEventListener('blur',()=>arrGo(false))}
@@ -1266,6 +1320,7 @@ menuBtn.addEventListener('click',e=>{e.preventDefault();setMenu(sheet.hidden)});
 menuBtn.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();setMenu(sheet.hidden)}});
 sheet.addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});
 d.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheet.hidden){setMenu(false);menuBtn.focus()}});
+mq('(min-width: 960px)').addEventListener('change',e=>{if(e.matches&&!sheet.hidden)setMenu(false)});
 
 /* ---------- smooth wheel scrolling (Lenis-style) ---------- */
 const SS={active:false,cur:scrollY,tgt:scrollY,set:-1};
@@ -1296,7 +1351,7 @@ let phase=0,spd=1,spdT=1,mom=0,introT=reduced?9:0,introDone=reduced;
 let mX=innerWidth/2,mY=innerHeight/2,pX=0,pY=0,hovered=null;
 let drag=null,swallow=false;
 function measureHero(){
-  const phone=W<780;
+  const phone=mPhone.matches;
   act=cards.filter(c=>!mPhone.matches||c.ph);
   const fr=field.getBoundingClientRect();G.w=fr.width;G.h=fr.height;
   G.k=mPhone.matches?clamp(W/620,.5,.72):clamp(Math.min(W/1440,H/900),.6,1.3)*.74;
@@ -1333,6 +1388,7 @@ field.addEventListener('pointerdown',e=>{
 });
 field.addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.id)return;
+  if(e.pointerType==='mouse'&&!e.buttons){endDrag(e);return}
   const dx=e.clientX-drag.x0;
   if(!drag.moved){if(Math.abs(dx)<6&&Math.abs(e.clientY-drag.y0)<6)return;if(Math.abs(e.clientY-drag.y0)>Math.abs(dx)&&e.pointerType!=='mouse'){drag=null;return}drag.moved=true;field.classList.add('grabbing');try{field.setPointerCapture(e.pointerId)}catch(_){}}
   const now=performance.now(),dt=Math.max(now-drag.lt,1)/1000,turn=.7*G.w;
@@ -1345,13 +1401,13 @@ function endDrag(e){
   if(drag.card&&hovered!==drag.card)drag.card.liftT=0;
   field.classList.remove('grabbing');drag=null;kick();
 }
-field.addEventListener('pointerup',endDrag);field.addEventListener('pointercancel',endDrag);
+field.addEventListener('pointerup',endDrag);field.addEventListener('pointercancel',endDrag);addEventListener('pointerup',endDrag);addEventListener('pointercancel',endDrag);
 field.addEventListener('click',e=>{if(swallow){e.preventDefault();e.stopPropagation();swallow=false}},true);
 field.addEventListener('dragstart',e=>e.preventDefault());
 addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){mX=e.clientX;mY=e.clientY}},{passive:true});
 
 function renderOrbit(dt){
-  const phone=W<780,n=act.length;
+  const phone=mPhone.matches,n=act.length;
   spd=lerp(spd,spdT,damp(dt,spdT<spd?11:4));
   if(!reduced&&!drag){phase+=spd*dt/160+mom*dt;mom*=Math.pow(.92,dt*60);if(Math.abs(mom)<2e-4)mom=0}
   if(!introDone){introT+=dt;if(introT>2){introDone=true;hero.classList.add('drawn')}}
@@ -1449,7 +1505,7 @@ function renderDeck(f){
     if(r>=0){const t=Math.min(r,1);x=t*dX1+Math.max(r-1,0)*W*.35;ry=-25*t;z=-240*t;o=r<=1?1:clamp(1-(r-1)*3,0,1)}
     else{const u=Math.min(-r,1);x=-u*W*.46;s=1-.1*u;o=1-u;ry=7*u}
     c.style.transform='translate3d('+x.toFixed(1)+'px,0,'+z.toFixed(1)+'px) rotateY('+ry.toFixed(2)+'deg) scale('+s.toFixed(4)+')';
-    c.style.opacity=o.toFixed(3);c.style.zIndex=r>=0?50-Math.round(r*10):30+Math.round(r*10);c.style.visibility=o<.01?'hidden':'visible';
+    c.style.opacity=o.toFixed(3);c.style.zIndex=r>=0?50-Math.round(r*10):30+Math.round(r*10);c.style.pointerEvents=o<.01?'none':'';
   }
   setMeter(deckMeter,f,dCards.length);dRend=f;
 }
@@ -1466,7 +1522,7 @@ function renderLad(f){
     const bo=clamp(1-ad*1.7,0,1);lBadges[i].style.opacity=bo.toFixed(3);
     if(bo>0)lBadges[i].style.transform='translate(-50%,-50%) scale('+(.72+.28*bo).toFixed(3)+') rotate('+(-dd*12).toFixed(2)+'deg)';
   }
-  const st=Math.round(f);
+  const st=clamp(Math.round(f),0,15);
   if(st!==lIdx){lIdx=st;const s=steps[st];lStepEl.textContent=String(st+1).padStart(2,'0');lTierEl.textContent=s.t;brTier.textContent=s.t;halo.style.setProperty('--hc',TC[s.t]);setBracket(st)}
   setMeter(ladMeter,f,16);lRend=f;
 }
@@ -1483,7 +1539,7 @@ if(!reduced){
 function lineDelays(h){const ws=$$('.wm',h);let top=null,line=-1;ws.forEach(w=>{const t=w.offsetTop;if(top===null||Math.abs(t-top)>4){line++;top=t}w.firstChild.style.setProperty('--dl',(line*.08)+'s')})}
 const fmt=(v,plus)=>Math.round(v).toLocaleString('en-US')+(plus?'+':'');
 function countUp(el){const to=+el.dataset.count,plus=el.hasAttribute('data-plus');if(reduced){el.textContent=fmt(to,plus);return}const t0=performance.now();const step=now=>{const u=clamp((now-t0)/1400,0,1);el.textContent=fmt(to*eOut(u),plus&&u===1);if(u<1)requestAnimationFrame(step)};el.textContent=fmt(0,false);requestAnimationFrame(step)}
-const rio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;if(el.classList.contains('rise'))lineDelays(el);if(el.dataset.count)countUp(el);el.classList.add('in');rio.unobserve(el)}),{threshold:.25,rootMargin:'0px 0px -6% 0px'});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting||(e.intersectionRatio<.25&&e.intersectionRect.height<innerHeight*.3))return;const el=e.target;if(el.classList.contains('rise'))lineDelays(el);if(el.dataset.count)countUp(el);el.classList.add('in');rio.unobserve(el)}),{threshold:[0,.025,.05,.075,.1,.15,.2,.25],rootMargin:'0px 0px -6% 0px'});
 $$('.rise,.fade,#fan,#vs,#ring-row,#skin-grid,[data-count]').forEach(el=>{if(reduced){el.classList.add('in')}else rio.observe(el)});
 /* ---------- FAQ: answers open to their height and rise in line by line ---------- */
 if(!reduced)$$('.qs details').forEach(dt=>{
@@ -1492,7 +1548,7 @@ if(!reduced)$$('.qs details').forEach(dt=>{
     e.preventDefault();
     const from=dt.open?a.getBoundingClientRect().height:0;
     if(an){an.onfinish=null;an.cancel();an=null}
-    want=!want;a.style.overflow='hidden';
+    want=!(dt.open&&!dt.classList.contains('closing'));a.style.overflow='hidden';
     if(want){
       dt.classList.remove('closing');dt.open=true;
       if(!ws){split(a,'',p=>{const w=d.createElement('span');w.className='aw';w.textContent=p;return w});ws=$$('.aw',a)}
@@ -1502,8 +1558,8 @@ if(!reduced)$$('.qs details').forEach(dt=>{
       an.onfinish=()=>{an=null;a.style.overflow=''};
     }else{
       dt.classList.add('closing');
-      an=a.animate([{height:from+'px',opacity:1},{height:'0px',opacity:0}],{duration:420,easing:'cubic-bezier(.65,0,.35,1)'});
-      an.onfinish=()=>{an=null;dt.open=false;dt.classList.remove('closing');a.style.overflow=''};
+      an=a.animate([{height:from+'px',opacity:1},{height:'0px',opacity:0}],{duration:420,easing:'cubic-bezier(.65,0,.35,1)',fill:'forwards'});
+      an.onfinish=()=>{const f=an;an=null;dt.open=false;dt.classList.remove('closing');a.style.overflow='';f.cancel()};
     }
   });
 });
@@ -1515,8 +1571,9 @@ if(!reduced&&mFine.matches)$$('.mag').forEach(b=>{b.style.transition='transform 
 
 /* ---------- "compete" pixel particles ---------- */
 const cv=$('#pword'),ctx=cv&&cv.getContext('2d');let parts=[],pwVis=false,pwW=0,pwH=0,pwDpr=1,pwReady=false;
-function buildParticles(){
-  if(!ctx)return;const r=cv.getBoundingClientRect();pwW=r.width;pwH=r.height;if(!pwW||!pwH)return;
+function buildParticles(force){
+  if(!ctx)return;const r=cv.getBoundingClientRect();if(!r.width||!r.height)return;
+  if(pwReady&&!force&&Math.abs(r.width-pwW)<1&&Math.abs(r.height-pwH)<1)return;pwW=r.width;pwH=r.height;
   pwDpr=Math.min(devicePixelRatio||1,2);cv.width=Math.round(pwW*pwDpr);cv.height=Math.round(pwH*pwDpr);ctx.setTransform(pwDpr,0,0,pwDpr,0,0);
   const oc=d.createElement('canvas');oc.width=Math.round(pwW);oc.height=Math.round(pwH);const o=oc.getContext('2d');
   let fs=pwH*.78;o.font='600 '+fs+'px Poppins';const tw=o.measureText('compete').width;if(tw>pwW*.9){fs*=pwW*.9/tw;o.font='600 '+fs+'px Poppins'}
@@ -1553,7 +1610,7 @@ function measure(){
   fillTop=big?docTop(big):0;fillH=big?big.offsetHeight:1;
   slides.forEach(el=>el.style.transform='');slideTops=slides.map(docTop);
   deckOn=mPin.matches;deckTop=docTop(deck);
-  if(deckOn){const cw=dCards[0].offsetWidth;dX1=W/2-clamp(W*.085,80,170)+cw/2;dRend=-1}else dCards.forEach(c=>{c.style.transform=c.style.opacity=c.style.zIndex=c.style.visibility=''});
+  if(deckOn){const cw=dCards[0].offsetWidth;dX1=W/2-clamp(W*.085,80,170)+cw/2;dRend=-1}else dCards.forEach(c=>{c.style.transform=c.style.opacity=c.style.zIndex=c.style.pointerEvents=''});
   ladOn=mPin.matches;ladTop=docTop(lad);rowH=lNames[0]&&lNames[0].offsetHeight||76;lRend=-1;
   if(!ladOn){lBadges.forEach(b=>{b.style.opacity='';b.style.transform=''});setBracket(11)}
   giant.style.fontSize='100px';const gw=Array.from(giant.children).reduce((a,c)=>a+c.offsetWidth,0),gp=parseFloat(getComputedStyle(giant).paddingLeft)||0;giant.style.fontSize=(100*(giant.clientWidth-2*gp)/gw*.99).toFixed(2)+'px';
@@ -1568,7 +1625,7 @@ function onScroll(){
   updFill();if(trioVis&&!reduced)updSlides();updGiant();navUpd();
 }
 function frame(now){
-  const dt=Math.min((now-last)/1000,.05);last=now;let more=false;
+  const dt=clamp((now-last)/1000,0,.05);last=now;let more=false;
   if(SS.active){SS.cur=lerp(SS.cur,SS.tgt,1-Math.exp(-6*dt));if(Math.abs(SS.tgt-SS.cur)<.4){SS.cur=SS.tgt;SS.active=false}else more=true;SS.set=SS.cur;scrollTo(0,SS.cur);dirty=true}
   if(dirty){dirty=false;sy=scrollY;onScroll()}
   if(deckOn){const t=deckTarget();dF=lerp(dF,t,damp(dt,12));if(Math.abs(dF-t)<.0006)dF=t;else more=true;if(dF!==dRend)renderDeck(dF)}
@@ -1579,19 +1636,25 @@ function frame(now){
   if(more)requestAnimationFrame(frame);else running=false; /* rAF itself stops while the tab is hidden */
 }
 addEventListener('scroll',()=>{if(SS.active&&Math.abs(scrollY-SS.set)>3){SS.active=false}if(!SS.active){SS.cur=SS.tgt=scrollY}dirty=true;inkReset();kick()},{passive:true});
-let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{measure();dirty=true;inkReset();kick()},120)});
+let rt;addEventListener('resize',()=>{
+  /* a phone toolbar sliding in or out changes only the height: no full re-measure (it would reshuffle the particle word) */
+  if(innerWidth===W&&!mPin.matches&&!mHeroPin.matches){H=innerHeight;dirty=true;kick();return}
+  clearTimeout(rt);rt=setTimeout(()=>{measure();dirty=true;inkReset();kick()},120);
+});
+/* anything that changes the page's height (an FAQ answer opening, the window) re-measures section tops and the footer */
+if('ResizeObserver' in window){let mh=0,mt;new ResizeObserver(()=>{const h=mainEl.offsetHeight;if(Math.abs(h-mh)<2)return;mh=h;clearTimeout(mt);mt=setTimeout(()=>{measure();dirty=true;kick()},160)}).observe(mainEl)}
 d.addEventListener('visibilitychange',()=>{last=performance.now();kick()});
-new IntersectionObserver(es=>{heroVis=es[0].isIntersecting;if(heroVis)kick()}).observe(hero);
-new IntersectionObserver(es=>{trioVis=es[0].isIntersecting;if(trioVis){dirty=true;kick()}}).observe($('#trio'));
-const pwEl=$('.pword');new IntersectionObserver(es=>{pwVis=es[0].isIntersecting;if(pwVis){if(!pwReady)buildParticles();kick()}}).observe(pwEl);
-const mio=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('off',!e.isIntersecting)));$$('.marquee').forEach(m=>mio.observe(m));
+new IntersectionObserver(es=>{heroVis=es[es.length-1].isIntersecting;if(heroVis)kick()}).observe(hero);
+new IntersectionObserver(es=>{trioVis=es[es.length-1].isIntersecting;if(trioVis){dirty=true;kick()}}).observe($('#trio'));
+const pwEl=$('.pword');new IntersectionObserver(es=>{pwVis=es[es.length-1].isIntersecting;if(pwVis){if(!pwReady)buildParticles();kick()}}).observe(pwEl);
+const mio=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('off',!e.isIntersecting)));$$('.marquee').forEach(m=>{mio.observe(m);m.addEventListener('click',()=>m.classList.toggle('held'))});
 
 /* ---------- anchors glide; deck cards map to their scroll position ---------- */
 d.addEventListener('click',e=>{
   if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey)return;
   const a=e.target.closest('a[href^="#"]');if(!a||a.classList.contains('menu-btn'))return;
   const id=decodeURIComponent(a.getAttribute('href').slice(1));const el=id?d.getElementById(id):null;if(!el)return;
-  e.preventDefault();let y;if(a.closest('.nav'))noTuckUntil=performance.now()+1800;
+  e.preventDefault();let y;if(!sheet.hidden)setMenu(false);if(a.closest('.nav'))noTuckUntil=performance.now()+1800;
   const di=dCards.indexOf(el);
   if(id==='top')y=0;else if(di>=0&&deckOn)y=deckTop+(di+.5)*H+2;else if(el===deck||id==='product')y=docTop(el)-90;else y=docTop(el)-90;
   glideTo(y);history.pushState(null,'','#'+id);
@@ -1601,8 +1664,14 @@ d.addEventListener('click',e=>{
 /* ---------- init ---------- */
 if(reduced)hero.classList.add('drawn');
 measure();renderOrbit(0);kick();scheduleWob();setTimeout(()=>navEl.classList.add('ready'),60);
-if(d.fonts&&d.fonts.ready)d.fonts.ready.then(()=>{measure();dirty=true;kick()});
-addEventListener('load',()=>{measure();dirty=true;kick()});
+if(d.fonts&&d.fonts.ready)d.fonts.ready.then(()=>{measure();buildParticles(true);dirty=true;kick()});
+addEventListener('load',()=>{
+  measure();dirty=true;kick();
+  /* arriving from another page on a deck card's link (e.g. /#inside-marking): land on that card, not the top of the pinned deck */
+  let id='';try{id=decodeURIComponent(location.hash.slice(1))}catch(_){}
+  const el=id&&d.getElementById(id),di=el?dCards.indexOf(el):-1;
+  if(di>=0&&deckOn)scrollTo(0,deckTop+(di+.5)*H+2);
+});
 })();
 </script>
 </body>
