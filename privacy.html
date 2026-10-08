@@ -21,6 +21,9 @@
   <h2>Study reminders</h2>
   <p>Daily reminders are scheduled on your phone by iOS; nothing about them is sent to us. Turn them off or change their times in Settings › Reminders.</p>
 
+  <h2>Signing in with Apple or Google</h2>
+  <p>If you continue with Apple or Google, they confirm who you are and share your name and email address (with Apple you can choose to hide your email, and Apple gives us a private relay address instead). We never see your Apple or Google password. When you delete an account that uses Sign in with Apple, Syllabo asks Apple to remove its access to your Apple ID.</p>
+
   <h2>What stays on your device</h2>
   <ul>
     <li>Your subjects, school units, notes, exams, saved-question folders and imported past-paper questions</li>
@@ -35,10 +38,15 @@
   <p>When you allow AI, answer marking, diagram marking, examiner and essay feedback, Teach the buddy, the Tutor tab and making flashcards from your notes send your answer, drawing, message or note text, the question and its mark scheme, and your first name, subject, level, current syllabus point and short mastery and recent-mistake summaries to Anthropic's Claude models through Syllabo's server (a Supabase Edge Function), over encrypted connections. This works with an online account, or as a guest on your first day of using AI, through an anonymous sign-in with no name or email. Our server does not keep what you send. It records how many AI requests an account made each day, to apply a daily allowance, and, to stop abuse, counts requests per minute against a one-way hash of your network (IP) address, which is cleared within about an hour. Anthropic handles the data under its own privacy policy. The first time you use AI the app asks for your permission, and you can turn AI off at any time in Settings › AI marking and tutor. If you instead enter your own Claude or Gemini API key, the same data goes directly to that provider under its own terms. With AI off, or without a connection, the offline tutor and meaning-based marking work on your device and nothing is sent.</p>
 
   <h2>Importing your notes</h2>
-  <p>When you import class notes, the camera scan, photos or PDF pages are turned into text on your device by Apple's text recognition; Syllabo does not upload or keep the images. Word and PowerPoint files, and files you send to Syllabo from other apps, are read on your device too. You can edit the text before anything is made from it. Offline, flashcards are made on your device. With AI on, the note text (never the images) is sent as described under AI marking and tutor to make flashcards and questions. What you save stays on your device, and with an online account it is included in your backup.</p>
+  <p>When you import class notes, the camera scan, photos or PDF pages are turned into text on your device by Apple's text recognition; Syllabo does not upload or keep the images. Word and PowerPoint files, and files you send to Syllabo from other apps, are read on your device too. You can edit the text before anything is made from it. Offline, flashcards are made on your device. With AI on, the note text (never the images) is sent as described under AI marking and tutor to make flashcards and questions. What you save, including the note text so more questions can be made from it later, stays on your device, and with an online account it is included in your backup. Deleting an import deletes its text too.</p>
 
   <h2>Friends</h2>
   <p>Friends are added by username; with online accounts they can be on any phone. A friend only sees what you allow: activity, mastery and streak can each be hidden, and you can turn off discovery by username. Friends never see your mistakes, notes, answers or email address.</p>
+
+  <h2>Quick Add and finding friends from contacts</h2>
+  <p>Quick Add suggests people you may know: friends of your friends (with the names of friends you share) and people you have played a duel with. Only students who leave Discoverable on are suggested.</p>
+  <p>If you tap Find friends from your contacts, Syllabo asks for access to your contacts and, on your phone, turns each contact's email address and phone number into a one-way code (a SHA-256 hash; a phone number is hashed from its last 8 digits). Only those codes are sent, they are compared with students who chose to be found that way, and they are not stored. Matches show the name saved in your own contacts, which never leaves your phone.</p>
+  <p>You can be found by people who have your email only if you turn on Friends › Find me from contacts › By my email, and by your phone number only if you add it there. We keep only the hashed code of your number, and you can remove it at any time.</p>
 
   <h2>Leagues and duels</h2>
   <p>With an online account you are placed each week in a league of up to 30 students at a similar level, who see your username, display name and XP for that week. In a duel, your friend sees your score, and how you did on each question once you have both played. Scores, results and the coins involved are stored on our server to settle leagues and duels, with a short record of them kept to prevent cheating.</p>
