@@ -9,7 +9,8 @@
   - anubi.io: the floating white nav; the giant extra-wide wordmark with cards on a
     tilted, clustered 3D orbit (its exact speed, radii, tilt, depth and transform values), pointer parallax, the pooled
     SVG ink trail, marker doodles and the wordmark wobble; the two-tone bottom-left headline and "Scopri" corner link;
-    the pinned "In Evidenza" deck with the next card turned in 3D at the right edge and the "02 ~~~ 06" readout;
+    the pinned "In Evidenza" reel (its card path, bend, fog, between-card doodles and drifting word, from anubi's public JS)
+    and the "02 ~~~ 06" readout;
     the dark band opened by a pixel-particle word; magnetic staggered words; mono section labels; Lenis-style smooth
     scrolling; the giant footer wordmark.
   - abatable.com: statement words that fill from grey to ink as you scroll; the hand of cards that fans out.
@@ -394,7 +395,8 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .dc-text p{margin-top:14px;font-size:15px;line-height:1.62;color:var(--ink-2)}
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
 .tags li{padding:8px 12px;border-radius:999px;background:#F0EFEA;font:500 12.5px/1 var(--body)}
-.dc-vis{position:relative;margin:12px;border-radius:22px;overflow:hidden;min-height:380px;background:var(--bg,var(--blue));isolation:isolate}
+.dc-right{display:flex;min-width:0;padding:12px}
+.dc-vis{position:relative;flex:1;min-width:0;margin:0;border-radius:22px;overflow:hidden;min-height:380px;background:var(--bg,var(--blue));isolation:isolate}
 .dc-vis .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .dc-vis .phone{position:absolute;left:50%;bottom:-24%;width:min(60%,300px);transform:translateX(-50%) rotate(-4deg)}
 .phone{display:block;padding:3%;border-radius:16%/7.4%;background:#04060B;box-shadow:0 40px 60px -28px rgba(0,0,0,.6),inset 0 0 0 1.5px #2B3348}
@@ -415,16 +417,30 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
 .meter .tot{font:500 13px/1 var(--mono);color:var(--grey);letter-spacing:.04em}
 .deck-hint{display:none;align-items:center;gap:10px;font:500 11.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
 .deck-hint svg{width:14px;height:14px}
+.reel-doodles,.deck-word{display:none}
 @media (max-width:860px){.deck-card{grid-template-columns:1fr}.dc-vis{min-height:420px}}
 @media (min-width:1100px) and (min-height:720px) and (prefers-reduced-motion:no-preference){
+  /* the reel: anubi.io's "In Evidenza" path in CSS 3D. Each card sits in a world seen by a camera 6 units away with a
+     40 degree field of view; the JS sets the frame size (--cw/--ch) and the camera distance in px (--rp). */
   html.js .deck{height:700vh}
-  html.js .deck-stage{position:sticky;top:0;height:100vh;padding:0;overflow:hidden;perspective:1700px;perspective-origin:50% 55%}
+  html.js .deck-stage{position:sticky;top:0;height:100vh;padding:0;overflow:hidden}
   html.js .deck-head{position:absolute;left:var(--pad);right:var(--pad);top:94px;margin:0;max-width:none;z-index:60;display:flex;align-items:flex-end;justify-content:space-between}
   html.js .deck-head .sec-label{display:none}
   html.js .deck-head .row{margin:0;width:100%}
   html.js .deck-head h2{font-size:clamp(34px,3vw,46px)}
-  html.js .deck-list{position:absolute;inset:0;display:block;max-width:none}
-  html.js .deck-card{position:absolute;left:50%;top:calc(50% + 42px);width:var(--cw);height:var(--ch);margin:calc(var(--ch)/-2) 0 0 calc(var(--cw)/-2);will-change:transform,opacity;backface-visibility:hidden}
+  html.js .deck-list{position:absolute;inset:0;display:block;max-width:none;perspective:var(--rp,1240px);perspective-origin:50% calc(50% + 28px);transform-style:preserve-3d}
+  html.js .deck-card{position:absolute;left:50%;top:calc(50% + 28px);width:var(--cw);height:var(--ch);margin:calc(var(--ch)/-2) 0 0 calc(var(--cw)/-2);will-change:transform,opacity;transform-style:preserve-3d;background:none;border:0;border-radius:0;overflow:visible;box-shadow:none}
+  /* while a card travels it folds a little along the line between its two halves (anubi bends its planes in a shader) */
+  html.js .deck-card>.dc-text,html.js .deck-card>.dc-right{position:relative;background:#fff;box-shadow:0 40px 70px -50px rgba(11,19,34,.45);backface-visibility:hidden}
+  html.js .deck-card>.dc-text{border-radius:28px 0 0 28px;transform-origin:100% 50%;transform:rotateY(calc(var(--fold,0)*-1deg))}
+  html.js .deck-card>.dc-right{border-radius:0 28px 28px 0;padding-left:12px;transform-origin:0 50%;transform:rotateY(calc(var(--fold,0)*1deg))}
+  /* cards further back fade towards the page colour, like anubi's fog */
+  html.js .deck-card>.dc-text::after,html.js .deck-card>.dc-right::after{content:"";position:absolute;inset:0;z-index:9;border-radius:inherit;background:var(--paper);opacity:var(--fog,0);pointer-events:none}
+  html.js .reel-doodles{display:block;position:absolute;inset:0;perspective:var(--rp,1240px);perspective-origin:50% calc(50% + 28px);pointer-events:none;z-index:2}
+  html.js .rd{position:absolute;left:50%;top:calc(50% + 28px);width:var(--dw,360px);height:var(--dw,360px);margin:calc(var(--dw,360px)/-2) 0 0 calc(var(--dw,360px)/-2);overflow:visible;opacity:0;filter:url(#grain);will-change:transform,opacity}
+  html.js .rd path{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+  html.js .deck-word{display:flex;position:absolute;left:50%;top:calc(50% + 28px);transform:translate(-50%,-50%);z-index:0;font-size:min(16.5vw,40vh);line-height:.8;color:var(--ink);pointer-events:none;-webkit-user-select:none;user-select:none}
+  html.js .deck-word span{display:block;opacity:.075;will-change:transform}
   html.js .deck .meter{display:flex;position:absolute;left:var(--pad);bottom:14px;z-index:60}
   html.js .deck-hint{display:flex;position:absolute;right:var(--pad);bottom:26px;z-index:60}
 }
@@ -853,6 +869,7 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
       <div class="sec-label"><p><i></i>03 / Inside Syllabo</p><p>Points • Practice • Learn • Marking • Tutor • Buddy</p></div>
       <div class="row"><h2 id="deck-h" class="disp rise">Inside Syllabo</h2><p class="parts">Six parts</p></div>
     </div>
+    <div class="deck-word disp" aria-hidden="true"><span>I</span><span>N</span><span>S</span><span>I</span><span>D</span><span>E</span></div>
     <div class="deck-list">
       <article class="deck-card" id="inside-points" aria-labelledby="dc1">
         <div class="dc-text">
@@ -861,12 +878,12 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Every question, flashcard and lesson is tagged to an official syllabus point, across 29 subjects and more than 53,000 questions. That is how the app knows what to show you next.</p>
           <ul class="tags"><li>What you have covered</li><li>What you keep getting wrong</li><li>What your next test is on</li></ul>
         </div>
-        <div class="dc-vis" style="--bg:#0B1322">
+        <div class="dc-right"><div class="dc-vis" style="--bg:#0B1322">
           <span class="chip" style="left:7%;top:12%">R1.1 Measuring enthalpy changes</span>
           <span class="chip dk" style="right:6%;top:30%;background:#2F63D6">B2.1 Membranes and membrane transport</span>
           <span class="chip" style="left:10%;top:48%">D2.3</span>
           <div class="phone"><img src="../assets/shots/notes.jpg" width="644" height="1400" alt="Flashcards made from class notes, each tagged to a syllabus point such as B2.1" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
       <article class="deck-card" id="inside-practice" aria-labelledby="dc2">
         <div class="dc-text">
@@ -875,10 +892,10 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Slide from 5 to 60 minutes. Syllabo sequences a warm-up, a lesson card, recall, application and an exam-format question, weighted towards what is weak and what is tested soon.</p>
           <ul class="tags"><li>Flashcards</li><li>MCQ</li><li>Written questions</li><li>Concept review</li><li>Exam practice</li><li>Teach your buddy</li></ul>
         </div>
-        <div class="dc-vis" style="--bg:#2F63D6">
+        <div class="dc-right"><div class="dc-vis" style="--bg:#2F63D6">
           <span class="chip" style="left:8%;top:14%">5 to 60 min</span>
           <div class="phone"><img src="../assets/shots/practice.jpg" width="644" height="1400" alt="Practice tab with duration slider and practice modes" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
       <article class="deck-card" id="inside-learn" aria-labelledby="dc3">
         <div class="dc-text">
@@ -887,11 +904,11 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Inside any subject, type "enthalpy" or "3.1" and go straight to the lesson, questions, MCQ or cards for that exact point.</p>
           <ul class="tags"><li>Lesson</li><li>Questions</li><li>MCQ</li><li>Cards</li></ul>
         </div>
-        <div class="dc-vis" style="--bg:#6A9BEF">
+        <div class="dc-right"><div class="dc-vis" style="--bg:#6A9BEF">
           <span class="chip" style="left:7%;top:13%"><svg aria-hidden="true"><use href="#i-search"/></svg>enthalpy</span>
           <span class="chip dk" style="right:8%;top:30%"><svg aria-hidden="true"><use href="#i-search"/></svg>3.1</span>
           <div class="phone"><img src="../assets/shots/learn.jpg" width="644" height="1400" alt="Learn tab with subjects and mastery" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
       <article class="deck-card" id="inside-marking" aria-labelledby="dc4">
         <div class="dc-text">
@@ -900,10 +917,10 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Paper 1, Paper 2 and essay-plan questions with command terms and mark allocations. Write your answer and AI marking credits the right idea in your own words, point by point. Then ask the tutor what you missed. Bookmark any question into folders you name.</p>
           <ul class="tags"><li>Paper 1</li><li>Paper 2</li><li>Essay plans</li><li>Command terms</li><li>Folders</li></ul>
         </div>
-        <div class="dc-vis" style="--bg:#E9E5DA">
+        <div class="dc-right"><div class="dc-vis" style="--bg:#E9E5DA">
           <span class="stamp">2/3<small>marks</small></span>
           <div class="phone"><img src="../assets/shots/marking.jpg" width="644" height="1400" alt="A Biology answer marked 2 out of 3, with the missing point highlighted in the model answer" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
       <article class="deck-card" id="inside-tutor" aria-labelledby="dc5">
         <div class="dc-text">
@@ -912,12 +929,12 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Explain this, quiz me, mark this. Free to use: it sees your subject, syllabus point, mastery and mistakes, and keeps your chat while you work through a question.</p>
           <ul class="tags"><li>Explain this</li><li>Quiz me</li><li>Mark this</li></ul>
         </div>
-        <div class="dc-vis" style="--bg:#17223A">
+        <div class="dc-right"><div class="dc-vis" style="--bg:#17223A">
           <span class="chip" style="left:7%;top:14%">Explain this</span>
           <span class="chip" style="right:7%;top:28%;background:#6A9BEF;color:#0B1322">Quiz me</span>
           <span class="chip" style="left:9%;top:44%;background:#FFC93C">Mark this</span>
           <div class="phone"><img src="../assets/shots/working.jpg" width="644" height="1400" alt="A Maths question with the working pad open" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
       <article class="deck-card" id="inside-buddy" aria-labelledby="dc6">
         <div class="dc-text">
@@ -926,12 +943,17 @@ html.js .big.fill .acc:not(.drawn) .spark{transform:scale(0)}
           <p>Your buddy reacts to every answer, cheers a streak and sulks when you skip a day. Dress it in any of 107 skins, each standing in its own illustrated scene, and teach it a topic to prove you understand it.</p>
           <ul class="tags"><li>107 skins</li><li>Streaks</li><li>Teach your buddy</li></ul>
         </div>
-        <div class="dc-vis">
+        <div class="dc-right"><div class="dc-vis">
           <img class="bgimg" src="../assets/scenes/astronaut.jpg" width="900" height="900" alt="" loading="lazy">
           <img class="dc-skin px" src="../assets/skins/astronaut.png" width="256" height="256" alt="Pip in the Astronaut skin" loading="lazy">
           <div class="phone"><img src="../assets/shots/buddy.jpg" width="644" height="1400" alt="Buddy tab with a skin and its illustrated background" loading="lazy"></div>
-        </div>
+        </div></div>
       </article>
+    </div>
+    <div class="reel-doodles" aria-hidden="true">
+      <svg class="rd" data-at="0.5" viewBox="-100 -100 200 200"><path pathLength="1" d="M-78 22C-70-40-8-62 26-34 54-11 30 38-6 30-38 22-30-30 8-44 46-58 82-30 86 8" stroke="#2F63D6"/></svg>
+      <svg class="rd sm" data-at="2.5" viewBox="-100 -100 200 200"><path pathLength="1" d="M0-86 22-30 84-28 34 8 52 68 0 34-52 68-34 8-84-28-22-30Z" stroke="#7C6CF0"/></svg>
+      <svg class="rd" data-at="4.5" viewBox="-100 -100 200 200"><path pathLength="1" d="M-84 40C-60 6-20-8 6 10 30 26 16 58-8 50-34 40-22 0 12-14 44-28 70-6 86-34" stroke="#F0524F"/></svg>
     </div>
     <div class="meter" id="deck-meter" aria-hidden="true">
       <span class="cur"><span class="roll"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span></span></span>
@@ -1496,19 +1518,46 @@ function stepNodes(dt){
 let trioVis=false;
 
 /* ---------- deck ---------- */
-const deck=$('#deck'),dCards=$$('.deck-card',deck);let deckOn=false,deckTop=0,dF=0,dRend=-1,dIdx=-1,dX1=0;
+const deck=$('#deck'),dCards=$$('.deck-card',deck),rDoodles=$$('.rd',deck),rWord=$$('.deck-word span',deck);let deckOn=false,deckTop=0,dF=0,dRend=-1,dIdx=-1;
 const deckMeter=meterOf($('#deck-meter'));
 function meterOf(el){if(!el)return null;return{roll:$('.roll',el),done:$('.done',el),idx:-1,h:40}}
 function setMeter(m,f,n){if(!m)return;m.done.style.strokeDashoffset=(1-clamp(f/(n-1),0,1)).toFixed(4);const i=Math.round(f);if(i!==m.idx){m.idx=i;m.roll.style.transform='translateY('+(-i*40)+'px)'}}
-function deckTarget(){const u=(sy-deckTop)/H-.5,n=dCards.length-1,v=clamp(u,0,n),i=Math.min(Math.floor(v),n-1),fr=v-i;return i+eIO(clamp((fr-.15)/.7,0,1))}
+function deckTarget(){const u=(sy-deckTop)/H-.5,n=dCards.length-1,v=clamp(u,0,n),i=Math.min(Math.floor(v),n-1),fr=v-i;return i+eIO(clamp((fr-.1)/.8,0,1))}
+/* the reel, after anubi.io's "In Evidenza": a camera 6 world units away with a 40 degree field of view. A card's place
+   comes from its distance e to the current one: upcoming cards queue up and to the right, further back and turned;
+   the one just passed flies left past the camera, larger, and fades; cards bow as they travel and lie flat at rest. */
+const RL={fov:40,cam:6,unit:1,ww:1,wh:1,fw:0,fh:0,halfW:1};
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+function reelMeasure(){
+  RL.wh=2*Math.tan(RL.fov*Math.PI/360)*RL.cam;RL.ww=RL.wh*W/H;RL.unit=RL.wh/H;
+  RL.fh=Math.min(.6*H,W*.7/1.6);RL.fw=RL.fh*1.6;RL.halfW=RL.fw/2*RL.unit;
+  deck.style.setProperty('--cw',RL.fw.toFixed(1)+'px');deck.style.setProperty('--ch',RL.fh.toFixed(1)+'px');
+  deck.style.setProperty('--rp',(RL.cam/RL.unit).toFixed(1)+'px');deck.style.setProperty('--dw',(.68*RL.fh).toFixed(1)+'px');
+}
+function reelAt(e){
+  const n=Math.max(0,e),s=Math.max(0,-e),ww=RL.ww,wh=RL.wh;
+  return{x:e>=0?Math.sin(1.1*n)*ww*.74:-(.814*ww)*s*(1+.12*s),y:e>=0?Math.sin(.95*n)*wh*.2:-(.2*wh)*Math.sin(.95*s)*(1+.3*s),
+    z:e>=0?-(3*n):3*s-s*s*.3,ry:e>=0?-(.55*Math.sin(Math.min(n,1.5))):s*(.55+.17*s),rz:e>=0?-(.16*Math.sin(1.2*n)):s*(.192+.048*s),
+    o:e>=0?1-sstep(1.9,3,n):1-sstep(.66,1.05,s),bend:.2*Math.sin(clamp(e,-1,1)*Math.PI)};
+}
+const reelT=(p,dy,dz)=>'translate3d('+(p.x/RL.unit).toFixed(1)+'px,'+(-(p.y+dy)/RL.unit).toFixed(1)+'px,'+((p.z+dz)/RL.unit).toFixed(1)+'px)';
 function renderDeck(f){
   for(let j=0;j<dCards.length;j++){
-    const r=j-f,c=dCards[j];let x=0,z=0,ry=0,s=1,o=1;
-    if(r>=0){const t=Math.min(r,1);x=t*dX1+Math.max(r-1,0)*W*.35;ry=-25*t;z=-240*t;o=r<=1?1:clamp(1-(r-1)*3,0,1)}
-    else{const u=Math.min(-r,1);x=-u*W*.46;s=1-.1*u;o=1-u;ry=7*u}
-    c.style.transform='translate3d('+x.toFixed(1)+'px,0,'+z.toFixed(1)+'px) rotateY('+ry.toFixed(2)+'deg) scale('+s.toFixed(4)+')';
-    c.style.opacity=o.toFixed(3);c.style.zIndex=r>=0?50-Math.round(r*10):30+Math.round(r*10);c.style.pointerEvents=o<.01?'none':'';
+    const e=j-f,c=dCards[j],p=reelAt(e);
+    c.style.transform=reelT(p,0,0)+' rotateY('+p.ry.toFixed(4)+'rad) rotateZ('+(-p.rz).toFixed(4)+'rad)';
+    c.style.opacity=p.o.toFixed(3);c.style.zIndex=String(100-Math.round(e*10));c.style.pointerEvents=p.o<.01?'none':'';
+    c.style.setProperty('--fold',(Math.atan2(p.bend*1.6,RL.halfW)*180/Math.PI).toFixed(2));
+    c.style.setProperty('--fog',(sstep(.5,3,Math.max(0,e))*.5).toFixed(3));
   }
+  /* a marker doodle draws itself in the gap between two cards as that gap passes the middle */
+  rDoodles.forEach(el=>{
+    const n=+el.dataset.at-f,p=reelAt(n),vis=1-sstep(.22,.5,Math.abs(n));
+    el.style.opacity=vis.toFixed(3);if(vis<.002)return;
+    el.style.transform=reelT(p,.1*RL.fh*RL.unit,.1)+' rotateX('+(.2*Math.sin(2*n)).toFixed(4)+'rad) rotateY('+p.ry.toFixed(4)+'rad) rotateZ('+(-(.45*n-.15)).toFixed(4)+'rad)'+(el.classList.contains('sm')?' scale(.68)':'');
+    el.firstElementChild.style.strokeDashoffset=(1-sstep(-.5,.15,-n)).toFixed(4);
+  });
+  /* the big word behind the reel: its letters drift a little as the reel turns */
+  rWord.forEach((el,t)=>{const r=.95*f-.55*t;el.style.transform='translate3d('+(.018*Math.sin(.7*r)).toFixed(4)+'em,'+(.07*Math.sin(r)).toFixed(4)+'em,0) rotate('+(1.4*Math.sin(.6*r)).toFixed(3)+'deg)';el.style.opacity=(.075+.018*Math.cos(r)).toFixed(4)});
   setMeter(deckMeter,f,dCards.length);dRend=f;
 }
 
@@ -1612,7 +1661,7 @@ function measure(){
   fillTop=big?docTop(big):0;fillH=big?big.offsetHeight:1;
   slides.forEach(el=>el.style.transform='');slideTops=slides.map(docTop);
   deckOn=mPin.matches;deckTop=docTop(deck);
-  if(deckOn){const cw=dCards[0].offsetWidth;dX1=W/2-clamp(W*.085,80,170)+cw/2;dRend=-1}else dCards.forEach(c=>{c.style.transform=c.style.opacity=c.style.zIndex=c.style.pointerEvents=''});
+  if(deckOn){reelMeasure();dRend=-1}else{['--cw','--ch','--rp','--dw'].forEach(v=>deck.style.removeProperty(v));dCards.forEach(c=>{c.style.transform=c.style.opacity=c.style.zIndex=c.style.pointerEvents='';c.style.removeProperty('--fold');c.style.removeProperty('--fog')})}
   ladOn=mPin.matches;ladTop=docTop(lad);rowH=lNames[0]&&lNames[0].offsetHeight||76;lRend=-1;
   if(!ladOn){lBadges.forEach(b=>{b.style.opacity='';b.style.transform=''});setBracket(11)}
   giant.style.fontSize='100px';const gw=Array.from(giant.children).reduce((a,c)=>a+c.offsetWidth,0),gp=parseFloat(getComputedStyle(giant).paddingLeft)||0;giant.style.fontSize=(100*(giant.clientWidth-2*gp)/gw*.99).toFixed(2)+'px';
