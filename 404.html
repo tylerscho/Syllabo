@@ -59,7 +59,7 @@ ul{padding:0;list-style:none}
 
 /* the stage: a big 404 whose 0 is an eye */
 main{flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;gap:clamp(24px,5vw,72px);max-width:1240px;width:100%;margin:0 auto;padding:clamp(40px,7vh,90px) var(--pad) clamp(40px,6vh,72px)}
-.stage{position:relative;display:flex;justify-content:center;padding:6% 0}
+.stage{position:relative;display:flex;justify-content:flex-end;padding:6% 0}
 .code{display:flex;align-items:center;font-size:clamp(120px,19vw,300px);color:var(--ink);user-select:none}
 .code>span{display:block}
 .eye0{position:relative;width:.74em;height:.8em;margin:0 .02em;border:.15em solid var(--ink);border-radius:50%;background:#fff;overflow:hidden}
@@ -110,6 +110,7 @@ footer a{text-decoration:none}
 @media (max-width:859px){
   main{grid-template-columns:1fr;gap:28px;padding-top:28px}
   .stage{padding:10% 0 8%}
+  .stage{justify-content:center}
   .code{font-size:min(31vw,220px)}
 }
 @media (max-width:479px){.cta{display:none}.ways a{padding:13px 2px}}
