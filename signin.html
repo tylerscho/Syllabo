@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Signing in to Syllabo</title>
+<!--
+  The app opens this page to start "Continue with Google", so iPhone's sign-in prompt names syllabo.org instead of the
+  database's address. It forwards straight on to Syllabo's sign-in service with the same query (provider, the app's
+  return address and the one-time PKCE challenge). It only ever forwards to that one fixed address, and the service
+  itself checks the return address against its allow list.
+-->
+<script>location.replace("https://ktceskjocaycnquayffd.supabase.co/auth/v1/authorize" + location.search);</script>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0B1322;color:#C9D3E6;font:16px/1.5 -apple-system,system-ui,sans-serif}
+  a{color:#6A9BEF}
+</style>
+</head>
+<body>
+<noscript><p>Turn on JavaScript to sign in, or go back to the app.</p></noscript>
+<p>Opening Google sign-in…</p>
+</body>
+</html>
