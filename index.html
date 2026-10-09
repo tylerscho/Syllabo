@@ -1230,7 +1230,7 @@ const SUB0='IB Diploma study app',CIRC_COLS=['#2F63D6','#7C6CF0','#F0524F','#E7B
 /* sections in page order; the one holding the middle of the viewport is current, and a later entry wins (#deck sits inside #product) */
 const SECS=[['top'],['subjects','01','Subjects'],['product','02','The idea'],['deck','03','Inside Syllabo'],['how','04','How it works'],['compete','05','Compete'],['included','06','What is included'],['pricing','07','Pricing'],['faq','08','Questions'],['download','09','Get Syllabo']].map(([id,n,t])=>({id,n,t,el:d.getElementById(id),top:0}));
 const LINK_OF={product:'product',deck:'product',how:'how',compete:'compete',pricing:'pricing'};
-let secIdx=-1,navLink=null,circN=0,merged=null,tucked=false,lastSy=-1,tuckAcc=0,heroEnd=0,noTuckUntil=0;
+let secIdx=-1,navLink=null,circN=0,merged=null,tucked=false,lastSy=-1,tuckAcc=0,heroEnd=0,noTuckUntil=0,navHold=0,lastScrollT=0;
 /* rolling letters: the real word stays in .sr, two aria-hidden rows of letters do the roll */
 $$('.lbl',links).forEach(l=>{const t=l.textContent.trim(),row=()=>'<span>'+Array.from(t).map((c,j)=>'<i style="--j:'+j+'">'+(c===' '?' ':c)+'</i>').join('')+'</span>';l.innerHTML='<span class="sr">'+t+'</span><span class="rl" aria-hidden="true">'+row()+row()+'</span>'});
 function measureNav(){
@@ -1273,9 +1273,18 @@ function rollSub(sec,dir,first){
   if(lkSpark)lkSpark.animate([{transform:'none'},{transform:'rotate('+(dir*180)+'deg) scale(1.45)',offset:.45},{transform:'rotate('+(dir*360)+'deg)'}],{duration:900,easing:'cubic-bezier(.34,1.45,.64,1)'});
 }
 function setTuck(v){if(v!==tucked){tucked=v;navEl.classList.toggle('tuck',v)}}
+/* a nav click moves the circle and the readout straight to that link, and holds them there while the page glides past
+   the sections in between, so the circle does not stop on each one on the way */
+function navJump(id){
+  const k=SECS.findIndex(x=>x.id===id);if(k<0)return;
+  navHold=performance.now()+700;
+  if(k!==secIdx){const dir=k>secIdx?1:-1;secIdx=k;rollSub(SECS[k],dir,false)}
+  const lid=LINK_OF[id]||null;setActive(lid);sheetA.forEach(a=>a.classList.toggle('on',a.dataset.sec===lid));
+}
 function navUpd(){
+  const now=performance.now(),held=navHold&&(now<navHold||SS.active||now-lastScrollT<160);if(!held)navHold=0;
   const mid=sy+H*.5;let k=0;for(let i=1;i<SECS.length;i++)if(SECS[i].top<=mid)k=i;
-  if(k!==secIdx){const first=secIdx<0,dir=k>secIdx?1:-1;secIdx=k;const sec=SECS[k],lid=LINK_OF[sec.id]||null;rollSub(sec,dir,first);setActive(lid);sheetA.forEach(a=>a.classList.toggle('on',a.dataset.sec===lid))}
+  if(!held&&k!==secIdx){const first=secIdx<0,dir=k>secIdx?1:-1;secIdx=k;const sec=SECS[k],lid=LINK_OF[sec.id]||null;rollSub(sec,dir,first);setActive(lid);sheetA.forEach(a=>a.classList.toggle('on',a.dataset.sec===lid))}
   const m=W<960||sy>H*.55;if(m!==merged){merged=m;navEl.classList.toggle('merged',m)}
   wvF.style.strokeDashoffset=(1-clamp(sy/Math.max(maxY(),1),0,1)).toFixed(4);
   /* tuck away while reading down past the hero, come back on the way up */
@@ -1686,7 +1695,7 @@ function frame(now){
   if(pwVis&&!reduced){drawParticles(dt,false);more=true}
   if(more)requestAnimationFrame(frame);else running=false; /* rAF itself stops while the tab is hidden */
 }
-addEventListener('scroll',()=>{if(SS.active&&Math.abs(scrollY-SS.set)>3){SS.active=false}if(!SS.active){SS.cur=SS.tgt=scrollY}dirty=true;inkReset();kick()},{passive:true});
+addEventListener('scroll',()=>{lastScrollT=performance.now();if(SS.active&&Math.abs(scrollY-SS.set)>3){SS.active=false}if(!SS.active){SS.cur=SS.tgt=scrollY}dirty=true;inkReset();kick()},{passive:true});
 let rt;addEventListener('resize',()=>{
   /* a phone toolbar sliding in or out changes only the height: no full re-measure (it would reshuffle the particle word) */
   if(innerWidth===W&&!mPin.matches&&!mHeroPin.matches){H=innerHeight;dirty=true;kick();return}
@@ -1705,7 +1714,7 @@ d.addEventListener('click',e=>{
   if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey)return;
   const a=e.target.closest('a[href^="#"]');if(!a||a.classList.contains('menu-btn'))return;
   const id=decodeURIComponent(a.getAttribute('href').slice(1));const el=id?d.getElementById(id):null;if(!el)return;
-  e.preventDefault();let y;if(!sheet.hidden)setMenu(false);if(a.closest('.nav'))noTuckUntil=performance.now()+1800;
+  e.preventDefault();let y;if(!sheet.hidden)setMenu(false);if(a.closest('.nav'))noTuckUntil=performance.now()+1800;if(a.dataset.sec&&a.closest('.nav,.sheet'))navJump(a.dataset.sec);
   const di=dCards.indexOf(el);
   if(id==='top')y=0;else if(di>=0&&deckOn)y=deckTop+(di+.5)*H+2;else if(el===deck||id==='product')y=docTop(el)-90;else y=docTop(el)-90;
   glideTo(y);history.pushState(null,'','#'+id);
