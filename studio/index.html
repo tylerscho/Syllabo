@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src https://*.supabase.co; base-uri 'none'; form-action 'none'">
+<title>Syllabo Usage</title>
+<!--
+  Syllabo's usage dashboard, for the laptop. Plan: docs/plans/2026-10-10-usage-dashboard.md.
+  Open it with Tools/metrics/open-dashboard.command (writes config.js from Secrets.plist, then opens this page).
+  Sign in with an account listed in the `admins` table. Data: rpc/usage_dashboard (Tools/supabase/usage_dashboard.sql),
+  rpc/feedback_list and rpc/feedback_set_status (Tools/supabase/usage_events.sql). No third-party scripts.
+  dashboard.html?demo shows made-up numbers, for checking the layout.
+  Published copy (syllabo.org/studio): Tools/metrics/publish.command writes it with the config inlined.
+  Team members join with their own Syllabo account and a team key (Tools/supabase/usage_team.sql).
+-->
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --raised: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --s1: #2a78d6; --s1-fill: rgba(42,120,214,0.12); --s2: #eb6834; --s3: #1baf7a;
+  --seq-0: #cde2fb; --seq-1: #9ec5f4; --seq-2: #6da7ec; --seq-3: #3987e5; --seq-4: #256abf; --seq-5: #184f95;
+  --up: #006300; --down: #d03b3b; --warn: #fab219; --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --raised: #222221; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --s1: #3987e5; --s1-fill: rgba(57,135,229,0.18); --s2: #d95926; --s3: #199e70;
+    --seq-0: #104281; --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf; --seq-4: #3987e5; --seq-5: #6da7ec;
+    --up: #0ca30c; --down: #e66767; --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --raised: #222221; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+  --s1: #3987e5; --s1-fill: rgba(57,135,229,0.18); --s2: #d95926; --s3: #199e70;
+  --seq-0: #104281; --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf; --seq-4: #3987e5; --seq-5: #6da7ec;
+  --up: #0ca30c; --down: #e66767; --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+button, input, select { font: inherit; color: inherit; }
+a { color: var(--accent); }
+.hidden { display: none !important; }
+
+/* Sign-in */
+.signin { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.signin form { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--ring); border-radius: 14px; padding: 28px; display: grid; gap: 12px; }
+.signin h1 { font-size: 20px; margin: 0; }
+.signin p { margin: 0; color: var(--ink-2); }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; color: var(--ink-2); }
+.field input { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--axis); background: var(--page); }
+.btn { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--axis); background: var(--raised); cursor: pointer; }
+.btn:hover { background: var(--wash); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.small { padding: 4px 10px; font-size: 12px; }
+.linkish { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; }
+.error { color: var(--down); font-size: 13px; }
+.note { color: var(--muted); font-size: 12px; }
+
+/* Shell */
+.shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+.side { background: var(--surface); border-right: 1px solid var(--ring); padding: 18px 10px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; }
+.brand { font-weight: 650; font-size: 16px; padding: 4px 12px 16px; }
+.brand span { color: var(--muted); font-weight: 400; }
+.nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: var(--ink-2); border: 0; background: none; text-align: left; width: 100%; }
+.nav:hover { background: var(--wash); }
+.nav.on { background: var(--wash); color: var(--ink); font-weight: 600; box-shadow: inset 3px 0 0 var(--accent); }
+.nav .count { margin-left: auto; background: var(--accent); color: #fff; border-radius: 10px; font-size: 11px; padding: 0 7px; }
+.side .foot { margin-top: auto; padding: 12px; display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+.main { padding: 22px 28px 60px; min-width: 0; }
+.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.top h2 { font-size: 22px; margin: 0 auto 0 0; }
+.seg { display: inline-flex; border: 1px solid var(--axis); border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; background: var(--raised); padding: 7px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--axis); }
+.seg button.on { background: var(--accent); color: #fff; }
+.stamp { color: var(--muted); font-size: 12px; }
+.loading .content { opacity: 0.45; transition: opacity .15s; }
+
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 14px; padding: 18px; min-width: 0; }
+.card h3 { margin: 0 0 4px; font-size: 15px; }
+.card .sub { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+
+/* KPI tabs (Studio-style) */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--grid); margin: -18px -18px 16px; }
+.kpi { border: 0; background: none; text-align: left; padding: 16px 18px 14px; cursor: pointer; border-bottom: 3px solid transparent; min-width: 0; }
+.kpi:hover { background: var(--wash); }
+.kpi.on { border-bottom-color: var(--accent); background: var(--wash); }
+.kpi .label { font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .value { font-size: 26px; font-weight: 650; margin: 2px 0; }
+.kpi .delta { font-size: 12px; color: var(--muted); }
+.delta.up { color: var(--up); } .delta.down { color: var(--down); }
+
+/* Charts */
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart .gridline { stroke: var(--grid); stroke-width: 1; }
+.chart .baseline { stroke: var(--axis); stroke-width: 1; }
+.tip { position: absolute; pointer-events: none; background: var(--raised); border: 1px solid var(--ring); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; z-index: 5; }
+.tip .row { display: flex; align-items: center; gap: 8px; }
+.tip .key { width: 12px; height: 2px; border-radius: 1px; }
+.tip b { font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin: 0 0 8px; }
+.legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; border-radius: 1px; }
+
+/* Bars and tables */
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(110px, 34%) 1fr auto; align-items: center; gap: 10px; font-size: 13px; }
+.bar .name { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 18px; position: relative; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--s1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar .val { font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
+.bar .drop { color: var(--down); font-size: 11px; margin-left: 6px; }
+.bar .share { color: var(--muted); font-size: 11px; margin-left: 6px; }
+.bar.worst .name { color: var(--ink); font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+td.num, th.num { text-align: right; }
+.cell { display: inline-block; min-width: 54px; text-align: center; border-radius: 6px; padding: 2px 6px; }
+.pending { color: var(--muted); font-style: italic; }
+.stack { display: flex; height: 22px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface); }
+.stack div { min-width: 2px; }
+.empty { color: var(--muted); padding: 18px 0; text-align: center; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--wash); color: var(--ink-2); border: 1px solid var(--ring); }
+
+/* Feedback */
+.fb-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.fb { border: 1px solid var(--ring); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: var(--surface); }
+.fb .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.fb .text { margin: 8px 0; white-space: pre-wrap; font-size: 14px; }
+.fb .meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.fb .actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.fb details { margin-top: 8px; font-size: 12px; color: var(--ink-2); }
+.fb details ol { margin: 6px 0 0; padding-left: 20px; }
+.status-new { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--ring); }
+  .side .foot { display: none; }
+  .brand { width: 100%; padding-bottom: 6px; }
+  .nav { width: auto; }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+}
+</style>
+<script>window.SYLLABO_DASH = {"url": "https://ktceskjocaycnquayffd.supabase.co", "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Y2Vza2pvY2F5Y25xdWF5ZmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQ3MDgsImV4cCI6MjEwNDcwMDcwOH0.nbpjbfvOV_dyPBhc4Ko6V8AuHyLviKxzhJUVGCS3DFQ"};</script>
+</head>
+<body>
+
+<div id="signin" class="signin hidden">
+  <form id="signin-form" autocomplete="on">
+    <h1>Syllabo usage</h1>
+    <p>Sign in with your Syllabo account. The first time, you'll also need the team key.</p>
+    <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div>
+    <div class="field" id="pw-field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div>
+    <div class="field hidden" id="code-field"><label for="code">6-digit code from the email</label><input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10"></div>
+    <button class="btn primary" type="submit" id="signin-btn">Sign in</button>
+    <button class="linkish" type="button" id="mode-btn">Signed up with Apple or Google? Email me a code instead</button>
+    <div class="error" id="signin-error"></div>
+    <div class="note" id="config-note"></div>
+  </form>
+</div>
+
+<div id="join" class="signin hidden">
+  <form id="join-form" autocomplete="off">
+    <h1>Enter the team key</h1>
+    <p id="join-who"></p>
+    <p>Ask Tyler for a team key. It looks like 7F3A-91C2-0BDE and works once for you.</p>
+    <div class="field"><label for="team-key">Team key</label><input id="team-key" required autocapitalize="characters" spellcheck="false"></div>
+    <button class="btn primary" type="submit">Join</button>
+    <button class="linkish" type="button" id="join-signout">Use a different account</button>
+    <div class="error" id="join-error"></div>
+  </form>
+</div>
+
+<div id="app" class="shell hidden">
+  <aside class="side">
+    <div class="brand">Syllabo <span>usage</span></div>
+    <button class="nav on" data-page="overview">Overview</button>
+    <button class="nav" data-page="setup">Setup funnel</button>
+    <button class="nav" data-page="retention">Coming back</button>
+    <button class="nav" data-page="sessions">Sessions</button>
+    <button class="nav" data-page="problems">Problems</button>
+    <button class="nav" data-page="feedback">Feedback <span class="count hidden" id="fb-count"></span></button>
+    <button class="nav" data-page="team">Team</button>
+    <div class="foot">
+      <div id="who"></div>
+      <div><button class="linkish" id="theme-btn" type="button">Light or dark</button></div>
+      <div><button class="linkish" id="signout-btn" type="button">Sign out</button></div>
+      <div id="live-note">Updates every 2 minutes while open.</div>
+      <div>Counts are events, not people. No student can be identified from them.</div>
+    </div>
+  </aside>
+  <main class="main" id="main">
+    <div class="top">
+      <h2 id="page-title">Overview</h2>
+      <div class="seg" id="range">
+        <button data-days="7">7 days</button><button data-days="28" class="on">28 days</button><button data-days="90">90 days</button><button data-days="365">365 days</button>
+      </div>
+      <label class="note" id="test-label" style="display:flex;gap:6px;align-items:center" title="Also count Debug builds launched with --usage-send, to see the pipeline working before a release."><input type="checkbox" id="test-box"> Show test builds</label>
+      <button class="btn" id="refresh-btn" type="button">Refresh</button>
+    </div>
+    <div class="stamp" id="stamp"></div>
+    <div class="error" id="load-error"></div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+const CFG = window.SYLLABO_DASH || {};
+const DEMO = new URLSearchParams(location.search).has("demo");
+// The dashboard isn't the app. A version far above any minimum lets it past the database's update gate
+// (check_app_version, Tools/supabase/app_version_gate.sql).
+const VERSION_HEADER = "999.0";
+const state = { days: 28, page: "overview", data: null, feedback: [], team: null, newKey: null, fbFilter: "new", kpi: "installs", session: null, includeTest: false };
+
+// ---------- small DOM helper: text always goes in as text, never as HTML (feedback is typed by students) ----------
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "style") el.setAttribute("style", v);
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  return el;
+}
+const svgNS = "http://www.w3.org/2000/svg";
+function s(tag, attrs, ...kids) {
+  const el = document.createElementNS(svgNS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) if (v != null) el.setAttribute(k, v);
+  for (const kid of kids.flat()) if (kid != null) el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  return el;
+}
+const fmt = (n) => (n == null || isNaN(n)) ? "–" : Math.round(n).toLocaleString();
+const fmt1 = (n) => (n == null || isNaN(n)) ? "–" : (Math.round(n * 10) / 10).toLocaleString();
+const pct = (a, b) => b > 0 ? Math.round((a / b) * 1000) / 10 : null;
+const dayLabel = (iso, long) => new Date(iso + "T00:00:00Z").toLocaleDateString(undefined, { day: "numeric", month: "short", timeZone: "UTC", ...(long ? { weekday: "short" } : {}) });
+
+// ---------- auth (Supabase Auth over plain fetch) ----------
+const SESSION_KEY = "syllabo-dash-session", EMAIL_KEY = "syllabo-dash-email";
+function loadSession() { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); } catch { return null; } }
+function saveSession(sess) { try { sess ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess)) : sessionStorage.removeItem(SESSION_KEY); } catch {} state.session = sess; }
+async function authPost(path, body) {
+  const r = await fetch(`${CFG.url}/auth/v1/${path}`, { method: "POST", headers: { apikey: CFG.anonKey, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error_description || j.msg || j.message || `Sign-in failed (${r.status}).`);
+  return j;
+}
+function keep(j, email) { saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, email }); }
+async function token() {
+  const sess = state.session;
+  if (!sess) throw new Error("signed out");
+  if (Date.now() < sess.expires_at - 60_000) return sess.access_token;
+  const j = await authPost("token?grant_type=refresh_token", { refresh_token: sess.refresh_token });
+  keep(j, sess.email);
+  return j.access_token;
+}
+async function rpc(name, body) {
+  const r = await fetch(`${CFG.url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: { apikey: CFG.anonKey, Authorization: `Bearer ${await token()}`, "Content-Type": "application/json", "X-Syllabo-Version": VERSION_HEADER },
+    body: JSON.stringify(body || {}),
+  });
+  const text = await r.text();
+  let j = null; try { j = text ? JSON.parse(text) : null; } catch {}
+  if (!r.ok) {
+    const msg = (j && (j.message || j.hint)) || `Request failed (${r.status}).`;
+    if (r.status === 401) { saveSession(null); showSignin("Your sign-in ran out. Sign in again."); }
+    if (msg === "Not allowed") { showJoin(); throw new Error("Not on the team yet."); }
+    throw new Error(msg);
+  }
+  return j;
+}
+
+// ---------- sign-in screen ----------
+let codeMode = false, codeSent = false;
+function showSignin(message) {
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("signin").classList.remove("hidden");
+  document.getElementById("signin-error").textContent = message || "";
+  document.getElementById("email").value = localStorage.getItem(EMAIL_KEY) || "";
+  if (!CFG.url || !CFG.anonKey) document.getElementById("config-note").textContent = "No config.js found. Open the dashboard with Tools/metrics/open-dashboard.command, which writes it from Secrets.plist. Or add ?demo to the address to see made-up numbers.";
+}
+document.getElementById("mode-btn").addEventListener("click", () => {
+  codeMode = !codeMode; codeSent = false;
+  document.getElementById("pw-field").classList.toggle("hidden", codeMode);
+  document.getElementById("code-field").classList.add("hidden");
+  document.getElementById("signin-btn").textContent = codeMode ? "Email me a code" : "Sign in";
+  document.getElementById("mode-btn").textContent = codeMode ? "Use my password instead" : "Signed up with Apple or Google? Email me a code instead";
+  document.getElementById("signin-error").textContent = "";
+});
+document.getElementById("signin-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = document.getElementById("signin-error"); err.textContent = "";
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  try { localStorage.setItem(EMAIL_KEY, email); } catch {}
+  try {
+    if (!codeMode) {
+      keep(await authPost("token?grant_type=password", { email, password: document.getElementById("password").value }), email);
+    } else if (!codeSent) {
+      // The password-reset email carries a 6-digit code (docs/CLOUD-SETUP.md); verifying it signs in without
+      // changing the password. It works for Apple and Google accounts too.
+      await authPost("recover", { email });
+      codeSent = true;
+      document.getElementById("code-field").classList.remove("hidden");
+      document.getElementById("signin-btn").textContent = "Sign in with the code";
+      err.textContent = "Code sent. The email is titled as a password reset; your password doesn't change.";
+      return;
+    } else {
+      keep(await authPost("verify", { type: "recovery", email, token: document.getElementById("code").value.trim() }), email);
+    }
+    document.getElementById("password").value = "";
+    startApp();
+  } catch (x) { err.textContent = x.message; }
+});
+
+// ---------- joining with a team key ----------
+function showJoin() {
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("signin").classList.add("hidden");
+  document.getElementById("join").classList.remove("hidden");
+  document.getElementById("join-who").textContent = `Signed in as ${state.session?.email || ""}.`;
+  document.getElementById("team-key").focus();
+}
+document.getElementById("join-signout").addEventListener("click", () => { document.getElementById("join").classList.add("hidden"); saveSession(null); showSignin(""); });
+document.getElementById("join-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = document.getElementById("join-error"); err.textContent = "";
+  try {
+    const r = await rpc("join_admins", { p_code: document.getElementById("team-key").value });
+    if (r === "joined" || r === "already") { document.getElementById("join").classList.add("hidden"); startApp(); return; }
+    err.textContent = r === "too_many" ? "Too many tries today. Try again tomorrow, or ask for a new key." : "That key isn't valid, has been used up or has expired.";
+  } catch (x) { err.textContent = x.message; }
+});
+
+// ---------- app shell ----------
+function startApp() {
+  document.getElementById("signin").classList.add("hidden");
+  document.getElementById("join").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("who").textContent = DEMO ? "Demo data" : (state.session?.email || "");
+  load();
+}
+document.querySelectorAll(".nav").forEach((b) => b.addEventListener("click", () => {
+  state.page = b.dataset.page;
+  document.querySelectorAll(".nav").forEach((n) => n.classList.toggle("on", n === b));
+  render();
+}));
+document.querySelectorAll("#range button").forEach((b) => b.addEventListener("click", () => {
+  state.days = Number(b.dataset.days);
+  document.querySelectorAll("#range button").forEach((n) => n.classList.toggle("on", n === b));
+  load();
+}));
+document.getElementById("refresh-btn").addEventListener("click", () => load());
+document.getElementById("test-box").addEventListener("change", (e) => { state.includeTest = e.target.checked; load(); });
+// Live: fresh numbers every 2 minutes while the tab is showing, and on coming back to it.
+setInterval(() => { if (!document.hidden && state.data && !document.getElementById("app").classList.contains("hidden")) load(true); }, 120000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && state.data && Date.now() - (state.loadedAt || 0) > 60000) load(true); });
+document.getElementById("signout-btn").addEventListener("click", () => { saveSession(null); showSignin(""); });
+document.getElementById("theme-btn").addEventListener("click", () => {
+  const dark = getComputedStyle(document.documentElement).colorScheme === "dark";
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("syllabo-dash-theme", document.documentElement.dataset.theme); } catch {}
+  render();
+});
+try { const t = localStorage.getItem("syllabo-dash-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+
+async function load(quiet) {
+  const main = document.getElementById("main");
+  if (!quiet) main.classList.add("loading");
+  document.getElementById("load-error").textContent = "";
+  try {
+    if (DEMO) {
+      state.data = demoData(state.days); state.feedback = demoFeedback();
+      state.team = { admins: [{ user_id: "1", email: "tyler@example.com", added_at: new Date().toISOString(), me: true }, { user_id: "2", email: "partner@example.com", added_at: new Date().toISOString(), me: false }], invites: [] };
+    }
+    else {
+      const [data, fb, team] = await Promise.all([rpc("usage_dashboard", { p_days: state.days, p_include_test: state.includeTest }),
+        rpc("feedback_list", { p_status: null }), rpc("admin_team", {}).catch(() => null)]);
+      state.data = data; state.feedback = fb || []; state.team = team;
+    }
+    state.loadedAt = Date.now();
+    const fresh = new Date(state.data.generated_at || Date.now());
+    document.getElementById("stamp").textContent = `${dayLabel(state.data.from, true)} to ${dayLabel(state.data.to, true)} (UTC) · updated ${fresh.toLocaleTimeString()}${state.includeTest ? " · including test builds" : " · App Store builds only"}`;
+    render();
+  } catch (x) {
+    if (x.message === "Not on the team yet.") return;
+    document.getElementById("load-error").textContent = /usage_dashboard/.test(x.message) && /function|exist/i.test(x.message)
+      ? "The dashboard function isn't on the server yet. Run Tools/supabase/usage_dashboard.sql in the SQL Editor."
+      : x.message;
+  } finally { main.classList.remove("loading"); }
+}
+
+const TITLES = { overview: "Overview", setup: "Setup funnel", retention: "Coming back", sessions: "Sessions", problems: "Problems", feedback: "Feedback", team: "Team" };
+function render() {
+  const d = state.data; if (!d) return;
+  document.getElementById("page-title").textContent = TITLES[state.page];
+  const newCount = state.feedback.filter((f) => f.status === "new").length;
+  const badge = document.getElementById("fb-count");
+  badge.textContent = newCount; badge.classList.toggle("hidden", newCount === 0);
+  const noRange = state.page === "feedback" || state.page === "team";
+  document.getElementById("range").classList.toggle("hidden", noRange);
+  document.getElementById("test-label").classList.toggle("hidden", noRange);
+  const c = document.getElementById("content"); c.replaceChildren();
+  ({ overview, setup, retention, sessions, problems, feedback, team })[state.page](c, d);
+}
+
+// ---------- charts ----------
+/** The top of the y-axis: four equal steps of a round number (1 to 8 times a power of ten), so every tick is a round number. */
+function niceMax(v) {
+  const raw = Math.max(1, v / 4), p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 3, 4, 5, 6, 8, 10]) if (m * p >= raw) return 4 * m * p;
+  return 40 * p;
+}
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+/** Line chart over days. series: [{name, color (css var), values[]}]. One y-axis, crosshair tooltip. */
+function lineChart(days, series, { height = 260, area = series.length === 1 } = {}) {
+  const W = 900, H = height, L = 44, R = 12, T = 10, B = 26;
+  const max = niceMax(Math.max(1, ...series.flatMap((x) => x.values)));
+  const n = days.length, x = (i) => L + (n === 1 ? (W - L - R) / 2 : (i * (W - L - R)) / (n - 1)), y = (v) => T + (H - T - B) * (1 - v / max);
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": series.map((x) => x.name).join(", ") + " by day" });
+  for (let k = 0; k <= 4; k++) {
+    const v = (max * k) / 4, yy = y(v);
+    svg.append(s("line", { x1: L, x2: W - R, y1: yy, y2: yy, class: k === 0 ? "baseline" : "gridline" }));
+    svg.append(s("text", { x: L - 8, y: yy + 4, "text-anchor": "end", class: "tick" }, fmt(v)));
+  }
+  const every = Math.max(1, Math.ceil(n / 8));
+  days.forEach((dd, i) => { if (i % every === 0 || i === n - 1) svg.append(s("text", { x: x(i), y: H - 6, "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", class: "tick" }, dayLabel(dd))); });
+  for (const se of series) {
+    const pts = se.values.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+    if (area) svg.append(s("polygon", { points: `${x(0)},${y(0)} ${pts} ${x(n - 1)},${y(0)}`, fill: css("--s1-fill") }));
+    svg.append(s("polyline", { points: pts, fill: "none", stroke: css(se.color), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  }
+  const hair = s("line", { y1: T, y2: H - B, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" });
+  const dots = series.map((se) => s("circle", { r: 4, fill: css(se.color), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" }));
+  svg.append(hair, ...dots);
+  const wrap = h("div", { class: "chart" }, svg);
+  const tip = h("div", { class: "tip hidden" }); wrap.append(tip);
+  const hit = s("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "transparent" });
+  svg.append(hit);
+  hit.addEventListener("pointermove", (ev) => {
+    const box = svg.getBoundingClientRect(), px = ((ev.clientX - box.left) / box.width) * W;
+    const i = Math.max(0, Math.min(n - 1, Math.round(((px - L) / (W - L - R)) * (n - 1))));
+    hair.setAttribute("x1", x(i)); hair.setAttribute("x2", x(i)); hair.setAttribute("visibility", "visible");
+    series.forEach((se, k) => { dots[k].setAttribute("cx", x(i)); dots[k].setAttribute("cy", y(se.values[i])); dots[k].setAttribute("visibility", "visible"); });
+    tip.replaceChildren(h("div", { style: "color:var(--muted);margin-bottom:4px" }, dayLabel(days[i], true)),
+      ...series.map((se) => h("div", { class: "row" }, h("span", { class: "key", style: `background:var(${se.color})` }), h("b", {}, fmt(se.values[i])), h("span", { style: "color:var(--ink-2)" }, se.name))));
+    tip.classList.remove("hidden");
+    const left = (x(i) / W) * box.width;
+    tip.style.left = Math.min(box.width - tip.offsetWidth, Math.max(0, left + 12)) + "px"; tip.style.top = "8px";
+  });
+  hit.addEventListener("pointerleave", () => { tip.classList.add("hidden"); hair.setAttribute("visibility", "hidden"); dots.forEach((d) => d.setAttribute("visibility", "hidden")); });
+  return wrap;
+}
+function legend(series) { return h("div", { class: "legend" }, series.map((se) => h("span", {}, h("i", { style: `background:var(${se.color})` }), se.name))); }
+
+/** Horizontal bars: rows [{name, value, note?, worst?}], max = largest value. */
+function bars(rows, { suffix = "" } = {}) {
+  if (!rows.length) return h("div", { class: "empty" }, "Nothing in this period yet.");
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  return h("div", { class: "bars" }, rows.map((r) => h("div", { class: "bar" + (r.worst ? " worst" : ""), title: `${r.name}: ${fmt(r.value)}${suffix}` },
+    h("div", { class: "name" }, r.name),
+    h("div", { class: "track" }, h("div", { class: "fill", style: `width:${(r.value / max) * 100}%` })),
+    h("div", { class: "val" }, fmt(r.value) + suffix, r.note ? h("span", { class: r.share ? "share" : "drop" }, r.note) : null))));
+}
+function table(head, rows, numCols = []) {
+  if (!rows.length) return h("div", { class: "empty" }, "Nothing in this period yet.");
+  return h("table", {}, h("thead", {}, h("tr", {}, head.map((t, i) => h("th", { class: numCols.includes(i) ? "num" : null }, t)))),
+    h("tbody", {}, rows.map((r) => h("tr", {}, r.map((v, i) => h("td", { class: numCols.includes(i) ? "num" : null }, v))))));
+}
+function deltaEl(cur, prev) {
+  if (!prev && !cur) return h("div", { class: "delta" }, "no change");
+  if (!prev) return h("div", { class: "delta" }, "new this period");
+  const p = Math.round(((cur - prev) / prev) * 100);
+  return h("div", { class: "delta " + (p > 0 ? "up" : p < 0 ? "down" : "") }, `${p > 0 ? "↑" : p < 0 ? "↓" : ""} ${Math.abs(p)}% vs previous`);
+}
+
+// ---------- names in plain words ----------
+const KIND = { taster: "First session", quick: "Quick session", practice: "Practice", learn: "Learn", mixed: "Learn and practise", exam: "Exam questions", reviewMistakes: "Review mistakes", aiDecides: "Syllabo picks", duel: "Duel", mock: "Mock paper", other: "Other" };
+const REASON = { too_hard: "Too hard", too_long: "Too long", wrong_topic: "Wrong topic", looking: "Just looking", broke: "Something broke", none: "No reason given" };
+const PROBLEM = { error: "Error", ai_mark_failed: "AI marking failed", signin_failed: "Sign-in failed", store_unavailable: "Couldn't open progress" };
+const PLATFORM = { iphone: "iPhone", ipad: "iPad", mac: "Mac" };
+const FB_KIND = { bug: "Something broke", confusing: "Confusing", wrong_question: "Wrong question", idea: "Idea", other: "Other", report: "Question report", mood: "How was that?" };
+const RR = { answer_key: "Answer key is wrong", unclear: "Unclear wording", not_exam: "Not like the real exam", typo: "Typo", too_hard_sl: "Too hard for SL", other: "Other" };
+const FACE = { good: "Good", okay: "Okay", bad: "Not great" };
+const CHOICE = { apple: "Apple", google: "Google", email: "Email", not_now: "Not now", code_later: "Code later", allow: "Allow", not_now_ai: "Not now", deny: "Don't allow" };
+
+// ---------- pages ----------
+const KPIS = [
+  { key: "installs", label: "New installs", series: "installs" },
+  { key: "active", label: "Avg daily active", series: "active", perDay: true },
+  { key: "setup_done", label: "Finished setup", series: "setup_done" },
+  { key: "sessions_finished", label: "Sessions finished", series: "sessions_finished" },
+  { key: "accounts", label: "Accounts created", series: "accounts" },
+  { key: "problems", label: "Problems", series: "problems", badWhenUp: true },
+];
+function overview(c, d) {
+  const days = d.daily.map((r) => r.day);
+  const card = h("div", { class: "card" });
+  const tabs = h("div", { class: "kpis" });
+  for (const k of KPIS) {
+    let cur = d.totals[k.key], prev = d.previous[k.key];
+    if (k.perDay) { cur = cur / d.days; prev = prev / d.days; }
+    const delta = deltaEl(cur, prev);
+    if (k.badWhenUp && delta.classList.contains("up")) { delta.classList.replace("up", "down"); }
+    else if (k.badWhenUp && delta.classList.contains("down")) { delta.classList.replace("down", "up"); }
+    tabs.append(h("button", { class: "kpi" + (state.kpi === k.key ? " on" : ""), onclick: () => { state.kpi = k.key; render(); } },
+      h("div", { class: "label" }, k.label), h("div", { class: "value" }, k.perDay ? fmt1(cur) : fmt(cur)), delta));
+  }
+  const sel = KPIS.find((k) => k.key === state.kpi);
+  card.append(tabs, lineChart(days, [{ name: sel.label.replace("Avg daily active", "Active that day"), color: "--s1", values: d.daily.map((r) => r[sel.series]) }]));
+  c.append(card);
+
+  const steps = d.setup_steps || [];
+  const first = steps[0]?.n || 0, setupDone = steps.find((x) => x.step === "setup done")?.n || 0, tasterDone = steps.find((x) => x.step === "taster finished")?.n || 0;
+  const welcome = d.welcome || {};
+  const funnel = h("div", { class: "card" }, h("h3", {}, "From install to first session"), h("p", { class: "sub" }, "Share of first opens that reach each point. The Setup funnel page has every screen."),
+    bars([
+      { name: "Opened the app", value: first },
+      { name: "Tapped Get started", value: welcome.get_started || 0 },
+      { name: "Finished setup", value: setupDone },
+      { name: "Finished first session", value: tasterDone },
+      { name: "Made an account", value: d.totals.accounts },
+    ].map((r) => ({ ...r, share: true, note: first ? `${pct(r.value, first)}%` : "" }))));
+  const devices = h("div", { class: "card" }, h("h3", {}, "Devices"), h("p", { class: "sub" }, "Days with the app opened, by device type."),
+    bars((d.platforms || []).map((p) => ({ name: PLATFORM[p.platform] || p.platform, value: p.n }))),
+    h("h3", { style: "margin-top:18px" }, "App versions"),
+    table(["Version", "Days opened"], (d.versions || []).slice(0, 6).map((v) => [v.app_version, fmt(v.n)]), [1]));
+  const fbNew = state.feedback.filter((f) => f.status === "new");
+  const latest = h("div", { class: "card" }, h("h3", {}, "Latest feedback"), h("p", { class: "sub" }, `${fbNew.length} new`),
+    fbNew.length ? h("div", {}, fbNew.slice(0, 4).map((f) => h("div", { style: "padding:8px 0;border-bottom:1px solid var(--grid)" },
+      h("div", { class: "note" }, `${FB_KIND[f.kind] || f.kind} · ${new Date(f.received_at).toLocaleDateString()}`),
+      h("div", { style: "overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, f.text || RR[f.reason] || FACE[f.face] || "(no text)"))),
+      h("button", { class: "btn small", style: "margin-top:10px", onclick: () => document.querySelector('.nav[data-page="feedback"]').click() }, "Open the inbox"))
+      : h("div", { class: "empty" }, "Nothing new."));
+  c.append(h("div", { class: "grid3" }, funnel, devices, latest));
+}
+
+function setup(c, d) {
+  const steps = d.setup_steps || [];
+  let worst = null;
+  steps.forEach((x) => { if (x.drop_off_pct != null && (worst == null || x.drop_off_pct > worst.drop_off_pct)) worst = x; });
+  c.append(h("div", { class: "card" }, h("h3", {}, "Setup, screen by screen"),
+    h("p", { class: "sub" }, `How many times each screen was reached in the last ${Math.min(180, d.days)} days, and the drop from the screen before. ${worst ? `Biggest drop: ${worst.step} (${worst.drop_off_pct}%).` : ""} A screen seen twice after Back counts twice.`),
+    bars(steps.map((x) => ({ name: x.step[0].toUpperCase() + x.step.slice(1), value: x.n, worst: worst && x.pos === worst.pos, note: x.drop_off_pct != null && x.drop_off_pct > 0 ? `−${x.drop_off_pct}%` : "" })))));
+  const w = d.welcome || {}, ss = d.save_sheet || { choices: {} }, ai = d.ai_consent || {};
+  c.append(h("div", { class: "grid3" },
+    h("div", { class: "card" }, h("h3", {}, "Welcome screen"), h("p", { class: "sub" }, `Shown ${fmt(w.shown)} times.`),
+      bars([{ name: "Get started", value: w.get_started || 0 }, { name: "I already have an account", value: w.sign_in || 0 }])),
+    h("div", { class: "card" }, h("h3", {}, "Save your progress sheet"), h("p", { class: "sub" }, `Shown ${fmt(ss.shown)} times.`),
+      bars(Object.entries(ss.choices || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ name: CHOICE[k] || k, value: v })))),
+    h("div", { class: "card" }, h("h3", {}, "AI permission"), h("p", { class: "sub" }, "What students chose when first asked."),
+      bars(Object.entries(ai).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ name: k === "not_now" ? "Not now" : CHOICE[k] || k, value: v }))))));
+  if ((d.tours_skipped || []).length) c.append(h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "Tours skipped"), h("p", { class: "sub" }, "Which stop the tour was on when it was skipped."),
+    table(["Tour", "Stop", "Times"], d.tours_skipped.map((t) => [t.tour, t.step, fmt(t.n)]), [2])));
+}
+
+function retention(c, d) {
+  const rows = d.retention || [];
+  const today = new Date(d.to + "T00:00:00Z");
+  const ready = (week, n) => (today - new Date(week + "T00:00:00Z")) / 86400000 >= n + 6;   // the whole week's installs are n days old
+  const shade = (p) => { if (p == null) return ""; const steps = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5"]; const k = Math.min(5, Math.floor(p / 12)); return `background:var(${steps[k]});color:${k >= 3 ? "#fff" : "var(--ink)"}`; };
+  const cell = (week, n, v, installs) => {
+    if (!ready(week, n)) return h("span", { class: "cell pending", title: "Not enough days yet" }, "not yet");
+    const p = pct(v, installs);
+    return h("span", { class: "cell", style: shade(p), title: `${fmt(v)} of ${fmt(installs)}` }, p == null ? "–" : `${p}%`);
+  };
+  c.append(h("div", { class: "card" }, h("h3", {}, "Coming back"),
+    h("p", { class: "sub" }, "Of the students who installed in each week (Monday start), the share who opened the app again 1, 7 and 30 days later. Day counts are local to the phone, so a cohort can shift by a day."),
+    table(["Install week", "Installs", "Day 1", "Day 7", "Day 30"], rows.slice().reverse().map((r) => [dayLabel(r.week), fmt(r.installs), cell(r.week, 1, r.d1, r.installs), cell(r.week, 7, r.d7, r.installs), cell(r.week, 30, r.d30, r.installs)]), [1, 2, 3, 4])));
+  const days = d.daily.map((r) => r.day);
+  c.append(h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "Active each day"), h("p", { class: "sub" }, "Phones, iPads and Macs that opened the app that day."),
+    lineChart(days, [{ name: "Active", color: "--s1", values: d.daily.map((r) => r.active) }], { height: 220 })));
+}
+
+function sessions(c, d) {
+  const days = d.daily.map((r) => r.day);
+  const ser = [{ name: "Started", color: "--s1", values: d.daily.map((r) => r.sessions_started) }, { name: "Finished", color: "--s2", values: d.daily.map((r) => r.sessions_finished) }];
+  c.append(h("div", { class: "card" }, h("h3", {}, "Sessions each day"), legend(ser), lineChart(days, ser, { area: false })));
+  const a = d.answers || {}, total = (a.right || 0) + (a.partly || 0) + (a.wrong || 0);
+  const seg = (v, color, label) => v ? h("div", { style: `flex:${v};background:var(${color})`, title: `${label}: ${fmt(v)} (${pct(v, total)}%)` }) : null;
+  c.append(h("div", { class: "grid2" },
+    h("div", { class: "card" }, h("h3", {}, "By kind of session"),
+      table(["Kind", "Started", "Finished", "Ended early", "Finished %"], (d.session_kinds || []).map((k) => [KIND[k.kind] || k.kind, fmt(k.started), fmt(k.finished), fmt(k.ended_early), k.started ? `${pct(k.finished, k.started)}%` : "–"]), [1, 2, 3, 4])),
+    h("div", { class: "card" }, h("h3", {}, "Why sessions ended early"), h("p", { class: "sub" }, "The optional reason on the End session card."),
+      bars((d.end_reasons || []).map((r) => ({ name: REASON[r.reason] || r.reason, value: r.n }))))));
+  c.append(h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "Answers in a student's first week"),
+    h("p", { class: "sub" }, `${fmt(total)} answers. ${fmt(a.by_ai)} marked by AI, ${fmt(a.gave_up)} "I don't know", ${fmt(a.overrode)} marks changed by the student, ${fmt(a.skipped)} questions skipped.`),
+    total ? h("div", {}, h("div", { class: "legend" }, h("span", {}, h("i", { style: "background:var(--s3);height:8px" }), `Right ${pct(a.right, total)}%`), h("span", {}, h("i", { style: "background:var(--s1);height:8px" }), `Partly ${pct(a.partly, total)}%`), h("span", {}, h("i", { style: "background:var(--s2);height:8px" }), `Wrong ${pct(a.wrong, total)}%`)),
+      h("div", { class: "stack" }, seg(a.right, "--s3", "Right"), seg(a.partly, "--s1", "Partly"), seg(a.wrong, "--s2", "Wrong"))) : h("div", { class: "empty" }, "Nothing in this period yet.")));
+}
+
+function problems(c, d) {
+  const days = d.daily.map((r) => r.day);
+  c.append(h("div", { class: "card" }, h("h3", {}, "Problems each day"), h("p", { class: "sub" }, "Failures the app counted: AI marking, sign-in, saving and opening progress."),
+    lineChart(days, [{ name: "Problems", color: "--s2", values: d.daily.map((r) => r.problems) }], { height: 220, area: false })));
+  c.append(h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "By type"),
+    table(["What", "Code", "Where", "Times"], (d.problems || []).map((p) => [PROBLEM[p.name] || p.name, p.code || "–", p.place || "–", fmt(p.n)]), [3]),
+    h("p", { class: "note", style: "margin-top:10px" }, "Codes: offline (no connection), 401 (signed out), 429 (allowance used), guest_expired (guest's free AI day over), consent_off (AI turned off), server, parse (the AI's reply couldn't be read).")));
+}
+
+function feedback(c, d) {
+  const faces = d.feedback?.faces || {};
+  const counts = { new: 0, seen: 0, done: 0 };
+  state.feedback.forEach((f) => counts[f.status]++);
+  const filters = h("div", { class: "fb-filters" },
+    ["new", "seen", "done", "all"].map((k) => h("button", { class: "btn small" + (state.fbFilter === k ? " primary" : ""), onclick: () => { state.fbFilter = k; render(); } },
+      k === "all" ? `All (${state.feedback.length})` : `${k[0].toUpperCase() + k.slice(1)} (${counts[k]})`)),
+    h("span", { class: "note", style: "margin-left:auto" }, `How was that? ${FACE.good} ${faces.good || 0} · ${FACE.okay} ${faces.okay || 0} · ${FACE.bad} ${faces.bad || 0} (this period)`));
+  c.append(filters);
+  const list = state.feedback.filter((f) => state.fbFilter === "all" || f.status === state.fbFilter);
+  if (!list.length) { c.append(h("div", { class: "card empty" }, "Nothing here.")); return; }
+  for (const f of list) {
+    const ctx = f.context || {};
+    const crumbs = (ctx.breadcrumbs || []).slice().reverse();
+    c.append(h("div", { class: "fb" },
+      h("div", { class: "head" },
+        h("span", { class: "tag" + (f.status === "new" ? " status-new" : "") }, f.status),
+        h("span", { class: "tag" }, FB_KIND[f.kind] || f.kind),
+        f.reason ? h("span", { class: "tag" }, RR[f.reason] || f.reason) : null,
+        f.face ? h("span", { class: "tag" }, FACE[f.face] || f.face) : null,
+        h("span", {}, new Date(f.received_at).toLocaleString()),
+        ctx.screen ? h("span", {}, `from ${ctx.screen}`) : null),
+      h("div", { class: "text" }, f.text || h("span", { class: "note" }, "(no text)")),
+      h("div", { class: "meta" },
+        f.question_id ? h("span", {}, `Question ${f.question_id}`) : null,
+        f.subject ? h("span", {}, `${f.subject}${f.level ? " " + f.level : ""}`) : null,
+        f.answer ? h("span", {}, `Their answer: ${f.answer}${f.mark ? ` (${f.mark})` : ""}`) : null,
+        ctx.app_version ? h("span", {}, `${ctx.app_version} · ${PLATFORM[ctx.platform] || ctx.platform} · iOS ${ctx.os_major} · day ${ctx.days_since_install}`) : null,
+        f.contact ? h("span", {}, "Reply to ", h("a", { href: `mailto:${f.contact}?subject=${encodeURIComponent("Your Syllabo feedback")}` }, f.contact)) : h("span", { class: "note" }, "Anonymous")),
+      crumbs.length ? h("details", {}, h("summary", {}, `The ${crumbs.length} steps before it, newest first`),
+        h("ol", {}, crumbs.map((b) => h("li", {}, `${b.name}${Object.keys(b.detail || {}).length ? " " + Object.entries(b.detail).map(([k, v]) => `${k}=${v}`).join(" ") : ""} · ${b.ago < 60 ? b.ago + " s" : Math.round(b.ago / 60) + " min"} before`)))) : null,
+      f.note ? h("div", { class: "note", style: "margin-top:6px" }, `Note: ${f.note}`) : null,
+      h("div", { class: "actions" },
+        f.status !== "seen" ? h("button", { class: "btn small", onclick: () => setStatus(f, "seen") }, "Mark seen") : null,
+        f.status !== "done" ? h("button", { class: "btn small", onclick: () => setStatus(f, "done") }, "Mark done") : null,
+        f.status !== "new" ? h("button", { class: "btn small", onclick: () => setStatus(f, "new") }, "Back to new") : null)));
+  }
+}
+function team(c) {
+  const t = state.team || { admins: [], invites: [] };
+  c.append(h("div", { class: "card" }, h("h3", {}, "Who can see this dashboard"),
+    h("p", { class: "sub" }, "Each person signs in with their own Syllabo account. Remove someone and they lose access at once."),
+    table(["Account", "Added", ""], t.admins.map((a) => [a.email + (a.me ? " (you)" : ""), new Date(a.added_at).toLocaleDateString(),
+      a.me || t.admins.length <= 1 ? "" : h("button", { class: "btn small", onclick: () => removeAdmin(a) }, "Remove")]))));
+  const keyBox = h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "Add someone"),
+    h("p", { class: "sub" }, "Make a team key and send it to them privately (not in a group chat). They open this page, sign in with their Syllabo account and enter the key. A key works for 2 people and expires after 14 days."),
+    state.newKey ? h("div", { style: "margin:4px 0 12px" }, h("div", { class: "note" }, "New key, shown only now:"),
+      h("div", { style: "font: 600 22px ui-monospace, Menlo, monospace; letter-spacing: 1px; margin: 4px 0" }, state.newKey),
+      h("button", { class: "btn small", onclick: () => navigator.clipboard?.writeText(state.newKey) }, "Copy")) : null,
+    h("button", { class: "btn primary", onclick: makeKey }, "Make a team key"),
+    t.invites.length ? h("div", { style: "margin-top:16px" }, table(["Key made", "Expires", "Uses left", ""], t.invites.map((i) => [
+      new Date(i.created_at).toLocaleDateString(), new Date(i.expires_at).toLocaleDateString(), String(i.uses_left),
+      h("button", { class: "btn small", onclick: () => cancelKey(i) }, "Cancel")]), [2])) : null);
+  c.append(keyBox);
+}
+async function makeKey() {
+  if (DEMO) { state.newKey = "7F3A-91C2-0BDE"; render(); return; }
+  try { state.newKey = await rpc("create_admin_invite", { p_uses: 2, p_days: 14 }); state.team = await rpc("admin_team", {}); render(); }
+  catch (x) { document.getElementById("load-error").textContent = x.message; }
+}
+async function cancelKey(i) {
+  try { await rpc("admin_cancel_invite", { p_id: i.id }); state.team = await rpc("admin_team", {}); render(); }
+  catch (x) { document.getElementById("load-error").textContent = x.message; }
+}
+async function removeAdmin(a) {
+  if (!confirm(`Remove ${a.email}? They lose access to this dashboard at once.`)) return;
+  try { await rpc("admin_remove", { p_user: a.user_id }); state.team = await rpc("admin_team", {}); render(); }
+  catch (x) { document.getElementById("load-error").textContent = x.message; }
+}
+
+async function setStatus(f, status) {
+  try {
+    if (!DEMO) await rpc("feedback_set_status", { p_id: f.id, p_status: status });
+    f.status = status; render();
+  } catch (x) { document.getElementById("load-error").textContent = x.message; }
+}
+
+// ---------- demo data (?demo): made-up numbers in the real shape, for checking the layout ----------
+function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+function demoData(days) {
+  const r = rng(days * 7 + 3), to = new Date(); to.setUTCHours(0, 0, 0, 0);
+  const iso = (dt) => dt.toISOString().slice(0, 10);
+  const daily = []; let base = 18;
+  for (let i = days - 1; i >= 0; i--) {
+    const dt = new Date(to - i * 86400000), wk = [0, 6].includes(dt.getUTCDay()) ? 0.7 : 1;
+    base = Math.max(6, base + (r() - 0.45) * 3);
+    const installs = Math.round(base * wk * (0.8 + r() * 0.4)), setup = Math.round(installs * (0.55 + r() * 0.15));
+    const active = Math.round(installs * 2.4 + 30 * wk + r() * 12), started = Math.round(active * (0.9 + r() * 0.3));
+    daily.push({ day: iso(dt), installs, active, setup_done: setup, sessions_started: started, sessions_finished: Math.round(started * (0.62 + r() * 0.12)), accounts: Math.round(setup * (0.25 + r() * 0.1)), problems: Math.round(r() * 6) });
+  }
+  const sum = (k) => daily.reduce((a, x) => a + x[k], 0);
+  const totals = { installs: sum("installs"), active: sum("active"), setup_done: sum("setup_done"), sessions_started: sum("sessions_started"), sessions_finished: sum("sessions_finished"), accounts: sum("accounts"), problems: sum("problems"), feedback: 9 };
+  const previous = Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, Math.round(v * (0.75 + r() * 0.4))]));
+  const inst = totals.installs, names = ["installed", "name", "showcase 1", "showcase 2", "showcase 3", "showcase 4", "subjects", "topics", "minutes", "plan", "setup done", "taster started", "taster finished"];
+  const keepR = [1, 0.88, 0.84, 0.8, 0.78, 0.76, 0.7, 0.6, 0.57, 0.55, 0.53, 0.5, 0.36];
+  const setup_steps = names.map((step, pos) => ({ pos, step, n: Math.round(inst * keepR[pos]), drop_off_pct: pos ? Math.round((1 - keepR[pos] / keepR[pos - 1]) * 1000) / 10 : null }));
+  const retention = []; for (let w = 9; w >= 0; w--) { const wkd = new Date(to - w * 7 * 86400000); const dow = (wkd.getUTCDay() + 6) % 7; const mon = new Date(wkd - dow * 86400000); const n = 80 + Math.round(r() * 60); retention.push({ week: iso(mon), installs: n, d1: Math.round(n * (0.38 + r() * 0.1)), d7: Math.round(n * (0.18 + r() * 0.08)), d30: Math.round(n * (0.08 + r() * 0.05)) }); }
+  return {
+    days, from: daily[0].day, to: daily[daily.length - 1].day, generated_at: new Date().toISOString(), totals, previous, daily, setup_steps, retention,
+    session_kinds: [{ kind: "quick", started: 820, finished: 560, ended_early: 260 }, { kind: "practice", started: 410, finished: 300, ended_early: 110 }, { kind: "taster", started: Math.round(inst * 0.5), finished: Math.round(inst * 0.36), ended_early: Math.round(inst * 0.14) }, { kind: "learn", started: 160, finished: 120, ended_early: 40 }, { kind: "duel", started: 90, finished: 84, ended_early: 6 }],
+    end_reasons: [{ reason: "none", n: 310 }, { reason: "too_long", n: 92 }, { reason: "too_hard", n: 71 }, { reason: "looking", n: 44 }, { reason: "wrong_topic", n: 38 }, { reason: "broke", n: 9 }],
+    problems: [{ name: "ai_mark_failed", code: "offline", place: "", n: 41 }, { name: "ai_mark_failed", code: "429", place: "", n: 12 }, { name: "signin_failed", code: "wrongCredentials", place: "welcome", n: 9 }, { name: "error", code: "offline", place: "save_sheet", n: 4 }],
+    platforms: [{ platform: "iphone", n: Math.round(totals.active * 0.82) }, { platform: "ipad", n: Math.round(totals.active * 0.12) }, { platform: "mac", n: Math.round(totals.active * 0.06) }],
+    versions: [{ app_version: "1.8", n: Math.round(totals.active * 0.7) }, { app_version: "1.7", n: Math.round(totals.active * 0.3) }],
+    welcome: { shown: Math.round(inst * 1.1), get_started: Math.round(inst * 0.86), sign_in: Math.round(inst * 0.12) },
+    save_sheet: { shown: Math.round(inst * 0.4), choices: { not_now: Math.round(inst * 0.2), apple: Math.round(inst * 0.08), google: Math.round(inst * 0.05), email: Math.round(inst * 0.04), code_later: 3 } },
+    ai_consent: { allow: Math.round(inst * 0.3), not_now: Math.round(inst * 0.12), deny: Math.round(inst * 0.03) },
+    answers: { right: 2100, partly: 640, wrong: 980, by_ai: 1300, gave_up: 210, overrode: 95, skipped: 140 },
+    tours_skipped: [{ tour: "main", step: "practiceTab", n: 22 }, { tour: "learn", step: "units", n: 9 }],
+    feedback: { new: 3, seen: 4, done: 2, faces: { good: 31, okay: 12, bad: 5 } },
+  };
+}
+function demoFeedback() {
+  const now = Date.now(), ago = (h) => new Date(now - h * 3600000).toISOString();
+  const ctx = { app_version: "1.8", platform: "iphone", os_major: 26, screen: "question", days_since_install: 2, breadcrumbs: [{ name: "session_started", ago: 300, detail: { kind: "quick" } }, { name: "question_answered", ago: 120, detail: { correct: "wrong", marked_by: "ai" } }] };
+  return [
+    { id: 1, status: "new", kind: "report", reason: "answer_key", text: "The mark scheme says glucose but the question asks about sucrose.", question_id: "BIO-Q102", subject: "bio", level: "HL", answer: "sucrose is transported in the phloem", mark: "1/3", received_at: ago(3), context: ctx, contact: null },
+    { id: 2, status: "new", kind: "bug", text: "The timer kept going after I closed the duel.", received_at: ago(20), context: { ...ctx, screen: "settings" }, contact: "student@example.com" },
+    { id: 3, status: "new", kind: "mood", face: "good", text: "", received_at: ago(30), context: null, contact: null },
+    { id: 4, status: "seen", kind: "idea", text: "Could the flashcards have a shuffle button?", received_at: ago(60), context: null, contact: null },
+    { id: 5, status: "done", kind: "confusing", text: "Wasn't sure what Syllabo picks meant.", received_at: ago(200), context: null, contact: null, note: "Renamed in 1.9" },
+  ];
+}
+
+// ---------- start ----------
+state.session = loadSession();
+if (DEMO) startApp();
+else if (state.session && CFG.url) startApp();
+else showSignin("");
+</script>
+</body>
+</html>
