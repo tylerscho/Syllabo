@@ -127,7 +127,6 @@ a { color: var(--accent); }
 .hm .label { display: block; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hm .value { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-variation-settings: "wdth" 112; font-size: 30px; letter-spacing: -.03em; line-height: 1; }
 .hm .basis { font-size: 12px; color: var(--muted); }
-.hm .means { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 .caption { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
 .caption b { color: var(--ink); font-weight: 600; }
 .stamp { font: 500 11px/1.4 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
@@ -780,26 +779,25 @@ function healthCard(d) {
     const good = goodUp ? diff > 0 : diff < 0;
     return h("div", { class: "delta " + (diff === 0 ? "" : good ? "up" : "down") }, diff === 0 ? "no change" : `${diff > 0 ? "↑" : "↓"} ${Math.abs(diff)}${unit} vs previous`);
   };
-  const metric = (label, value, basis, delta, means) => h("div", { class: "hm" },
+  const metric = (label, value, basis, delta) => h("div", { class: "hm" },
     h("div", { class: "label" }, label), h("div", { class: "value" }, value == null ? "–" : `${fmt1(value)}${label.startsWith("Problems") ? "" : "%"}`),
-    h("div", { class: "basis" }, basis), delta, h("div", { class: "means" }, means));
+    h("div", { class: "basis" }, basis), delta);
   const setupNow = ratio(t.setup_done, t.installs), setupPrev = ratio(p.setup_done, p.installs);
   const probNow = ratio(t.problems, t.active), probPrev = ratio(p.problems, p.active);
   return h("div", { class: "card" },
     h("h3", {}, "Weekly health"),
-    h("p", { class: "sub" }, "Five numbers that cover a new student's journey, worked out for you. Check them once a week; the rest of the dashboard explains why one moved."),
     h("div", { class: "health" },
       metric("Setup completion", setupNow, t.installs ? `${fmt(t.setup_done)} of ${fmt(t.installs)} new installs` : "No installs yet",
-        pts(setupNow, setupPrev), "Share of new students who finish setup."),
+        pts(setupNow, setupPrev)),
       metric("First session finished", ratio(stepN("taster finished"), stepN("taster started")),
         stepN("taster started") ? `${fmt(stepN("taster finished"))} of ${fmt(stepN("taster started"))} first sessions` : "No first sessions yet",
-        h("div", { class: "delta" }, ""), "Share who finish the first session after setup."),
+        h("div", { class: "delta" }, "")),
       metric("Day 1 return", r1 ? ratio(r1.d1, r1.installs) : null, r1 ? `Installed week of ${dayLabel(r1.week)}` : "Not enough days yet",
-        h("div", { class: "delta" }, ""), "Opened the app again the day after installing."),
+        h("div", { class: "delta" }, "")),
       metric("Day 7 return", r7 ? ratio(r7.d7, r7.installs) : null, r7 ? `Installed week of ${dayLabel(r7.week)}` : "Not enough days yet",
-        h("div", { class: "delta" }, ""), "Still opening the app a week after installing."),
+        h("div", { class: "delta" }, "")),
       metric("Problems per 100 days", probNow, t.active ? `${fmt(t.problems)} problems over ${fmt(t.active)} active days` : "No active days yet",
-        pts(probNow, probPrev, false, ""), "Failures for every 100 days someone used the app. Lower is better.")));
+        pts(probNow, probPrev, false, ""))));
 }
 
 function overview(c, d) {
