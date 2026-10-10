@@ -118,6 +118,18 @@ a { color: var(--accent); }
 .seg button.on { background: var(--ink); color: var(--page); }
 .check { display: flex; gap: 7px; align-items: center; font-size: 12.5px; color: var(--muted); cursor: pointer; }
 .check input { accent-color: var(--accent); }
+.lede { font-size: 15.5px; line-height: 1.55; color: var(--ink-2); max-width: 62ch; margin: 12px 0 0; }
+.notice { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--ring); border-left: 4px solid var(--accent); border-radius: 16px; padding: 16px 20px; margin-bottom: 18px; color: var(--ink-2); font-size: 14px; box-shadow: var(--shadow); }
+.notice b { color: var(--ink); }
+.health { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 0 -22px -22px; border-top: 1px solid var(--grid); }
+.hm { padding: 18px 20px 20px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.hm + .hm { border-left: 1px solid var(--grid); }
+.hm .label { display: block; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm .value { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-variation-settings: "wdth" 112; font-size: 30px; letter-spacing: -.03em; line-height: 1; }
+.hm .basis { font-size: 12px; color: var(--muted); }
+.hm .means { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.caption { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.caption b { color: var(--ink); font-weight: 600; }
 .stamp { font: 500 11px/1.4 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
 .loading .content { opacity: .45; transition: opacity .15s; }
 .foot-note { max-width: 1240px; margin: 0 auto; padding: 0 16px 40px; display: flex; gap: 18px; flex-wrap: wrap; font: 500 11px/1.4 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -193,6 +205,9 @@ td.num, th.num { text-align: right; }
   .bar { flex-wrap: wrap; }
   .tabs { order: 3; flex-basis: 100%; justify-content: flex-start; }
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .health { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hm + .hm { border-left: 0; }
+  .hm { border-top: 1px solid var(--grid); }
   .kpi:nth-child(4) { border-left: 0; }
   .kpi:nth-child(-n+3) { border-bottom: 1px solid var(--grid); }
   .grid2, .grid3 { grid-template-columns: 1fr; }
@@ -328,6 +343,7 @@ tbody tr:hover { background: var(--wash); }
       <div>
         <div class="label" id="page-kicker"><i></i><b>01</b> Overview</div>
         <h1 class="disp" id="page-title">Overview</h1>
+        <p class="lede" id="page-lede"></p>
         <div class="stamp" id="stamp"></div>
       </div>
       <div class="controls">
@@ -344,6 +360,7 @@ tbody tr:hover { background: var(--wash); }
   <footer class="foot-note">
     <span id="who"></span>
     <span id="live-note">Updates every 2 minutes while open</span>
+    <span>Keys 1 to 7 switch pages</span>
     <span>Counts are events, not people. No student can be identified from them.</span>
   </footer>
 </div>
@@ -487,14 +504,28 @@ function startApp() {
   document.getElementById("who").textContent = DEMO ? "Demo data" : (state.session?.email || "");
   load();
 }
-document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
-  state.page = b.dataset.page; state.animate = true;
-  document.querySelectorAll(".tab").forEach((n) => n.classList.toggle("on", n === b));
+// Each page has its own link (#setup, #feedback, ...), so the back button and bookmarks work.
+function setPage(page, fromHash) {
+  if (!TITLES[page]) page = "overview";
+  if (page === state.page && state.data) return;
+  state.page = page; state.animate = true;
+  document.querySelectorAll(".tab").forEach((n) => n.classList.toggle("on", n.dataset.page === page));
+  if (!fromHash && location.hash !== "#" + page) history.pushState(null, "", "#" + page);
   window.scrollTo({ top: 0 });
   render();
-}));
+}
+document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => setPage(b.dataset.page)));
+addEventListener("popstate", () => setPage(location.hash.slice(1), true));
+addEventListener("hashchange", () => setPage(location.hash.slice(1), true));
+addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea|select/i.test(e.target.tagName)) return;
+  if (document.getElementById("app").classList.contains("hidden")) return;
+  const pages = Object.keys(TITLES), i = Number(e.key) - 1;
+  if (i >= 0 && i < pages.length) setPage(pages[i]);
+});
 document.querySelectorAll("#range button").forEach((b) => b.addEventListener("click", () => {
   state.days = Number(b.dataset.days);
+  try { localStorage.setItem("syllabo-dash-days", String(state.days)); } catch {}
   document.querySelectorAll("#range button").forEach((n) => n.classList.toggle("on", n === b));
   moveInks();
   load();
@@ -541,9 +572,20 @@ async function load(quiet) {
 }
 
 const TITLES = { overview: "Overview", setup: "Setup funnel", retention: "Coming back", sessions: "Sessions", problems: "Problems", feedback: "Feedback", team: "Team" };
+// One line under each title: the question the page answers.
+const LEDES = {
+  overview: "How Syllabo is doing at a glance. Start with Weekly health: five numbers that cover a new student's whole journey.",
+  setup: "Where new students drop out before their first session. Fix the screen with the biggest drop first.",
+  retention: "Whether students come back after installing. Read across a row to see one week fade; read down to compare weeks.",
+  sessions: "How study sessions go: how many are finished, why some end early, and how first-week answers are marked.",
+  problems: "Things that failed in the app, by type. A new code, or a jump after a release, comes first.",
+  feedback: "Notes students chose to send. Read the new ones, reply where there is a contact, then mark them done.",
+  team: "Who can see this dashboard, and how to add someone.",
+};
 function render() {
   const d = state.data; if (!d) return;
   document.getElementById("page-title").textContent = TITLES[state.page];
+  document.getElementById("page-lede").textContent = LEDES[state.page];
   const order = Object.keys(TITLES), kicker = document.getElementById("page-kicker");
   kicker.replaceChildren(h("i"), h("b", {}, String(order.indexOf(state.page) + 1).padStart(2, "0")), ` ${TITLES[state.page]}`);
   const newCount = state.feedback.filter((f) => f.status === "new").length;
@@ -553,6 +595,15 @@ function render() {
   document.getElementById("range").classList.toggle("hidden", noRange);
   document.getElementById("test-label").classList.toggle("hidden", noRange);
   const c = document.getElementById("content"); c.replaceChildren();
+  // Nothing to show yet: say why, rather than a page of zeros.
+  const t = d.totals || {};
+  if (!noRange && !(t.installs || t.active || t.sessions_started || t.problems || t.setup_done)) {
+    c.append(h("div", { class: "notice" }, h("div", {},
+      state.includeTest ? h("b", {}, "No data in this period, even from test builds. ")
+                        : h("b", {}, "No App Store data in this period yet. "),
+      state.includeTest ? "Try a longer range, or launch a Debug build with --usage-send."
+                        : "Counts start with the first App Store release that includes them. To see our own testing, tick Show test builds.")));
+  }
   ({ overview, setup, retention, sessions, problems, feedback, team })[state.page](c, d);
   moveInks();
   if (state.animate) { state.animate = false; playEntrance(c); }
@@ -679,6 +730,28 @@ const KIND = { taster: "First session", quick: "Quick session", practice: "Pract
 const REASON = { too_hard: "Too hard", too_long: "Too long", wrong_topic: "Wrong topic", looking: "Just looking", broke: "Something broke", none: "No reason given" };
 const PROBLEM = { error: "Error", ai_mark_failed: "AI marking failed", signin_failed: "Sign-in failed", store_unavailable: "Couldn't open progress" };
 const PLATFORM = { iphone: "iPhone", ipad: "iPad", mac: "Mac" };
+const STEP = { "installed": "Opened for the first time", "name": "Name screen", "showcase 1": "Intro card 1", "showcase 2": "Intro card 2",
+  "showcase 3": "Intro card 3", "showcase 4": "Intro card 4", "subjects": "Subjects", "topics": "Topics covered", "minutes": "Daily minutes",
+  "plan": "Plan", "setup done": "Setup finished", "taster started": "First session started", "taster finished": "First session finished" };
+const stepName = (x) => STEP[x] || (x[0].toUpperCase() + x.slice(1));
+const CODE = { offline: "No connection on the phone", "401": "Signed out of their account", "404": "AI not set up on the server", "429": "Used the day's AI allowance",
+  guest_expired: "A guest's free day of AI ended", consent_off: "AI is turned off or not allowed", update_required: "App too old, update needed",
+  server: "Our server or the AI failed", parse: "The AI's reply couldn't be read", not_configured: "Online features missing in this build",
+  no_plan: "No first session could be built", refused: "The server refused the note", other: "Something else",
+  wrongCredentials: "Wrong email or password", emailTaken: "Email already has an account", usernameTaken: "Username already taken",
+  invalidEmail: "Email address not valid", weakPassword: "Password too short", needs_code: "Waiting for the emailed code",
+  invalidUsername: "Username not allowed", sameEmail: "Same email as before" };
+/** A code's meaning in words; an unlisted one is spelled out ("someNewCode" → "Some new code"). */
+const codeText = (c) => CODE[c] || (c ? c.replace(/[_-]+/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().replace(/^./, (x) => x.toUpperCase()) : "–");
+const PLACE = { welcome: "Sign-in screen", save_sheet: "Save-progress sheet", reconnect: "Reconnect sheet", taster: "First session", feedback: "Feedback" };
+const KPI_HELP = {
+  installs: "the first time Syllabo opens on a new device",
+  active: "devices that opened Syllabo that day (the tile shows the daily average)",
+  setup_done: "students who reached the end of setup",
+  sessions_finished: "study sessions finished to the end",
+  accounts: "new online accounts, from guests saving progress or new sign-ups",
+  problems: "failures the app counted (codes on the Problems page)",
+};
 const FB_KIND = { bug: "Something broke", confusing: "Confusing", wrong_question: "Wrong question", idea: "Idea", other: "Other", report: "Question report", mood: "How was that?" };
 const RR = { answer_key: "Answer key is wrong", unclear: "Unclear wording", not_exam: "Not like the real exam", typo: "Typo", too_hard_sl: "Too hard for SL", other: "Other" };
 const FACE = { good: "Good", okay: "Okay", bad: "Not great" };
@@ -693,7 +766,44 @@ const KPIS = [
   { key: "accounts", label: "Accounts created", series: "accounts" },
   { key: "problems", label: "Problems", series: "problems", badWhenUp: true },
 ];
+/** The five numbers from the team guide, worked out from what the page already has. */
+function healthCard(d) {
+  const steps = d.setup_steps || [], t = d.totals, p = d.previous;
+  const stepN = (name) => steps.find((x) => x.step === name)?.n || 0;
+  const today = new Date(d.to + "T00:00:00Z");
+  const newestReady = (n) => (d.retention || []).slice().reverse().find((r) => (today - new Date(r.week + "T00:00:00Z")) / 86400000 >= n + 6 && r.installs > 0);
+  const r1 = newestReady(1), r7 = newestReady(7);
+  const ratio = (a, b) => (b > 0 ? (a / b) * 100 : null);
+  const pts = (cur, prev, goodUp = true, unit = " pts") => {
+    if (cur == null || prev == null) return h("div", { class: "delta" }, "");
+    const diff = Math.round((cur - prev) * 10) / 10;
+    const good = goodUp ? diff > 0 : diff < 0;
+    return h("div", { class: "delta " + (diff === 0 ? "" : good ? "up" : "down") }, diff === 0 ? "no change" : `${diff > 0 ? "↑" : "↓"} ${Math.abs(diff)}${unit} vs previous`);
+  };
+  const metric = (label, value, basis, delta, means) => h("div", { class: "hm" },
+    h("div", { class: "label" }, label), h("div", { class: "value" }, value == null ? "–" : `${fmt1(value)}${label.startsWith("Problems") ? "" : "%"}`),
+    h("div", { class: "basis" }, basis), delta, h("div", { class: "means" }, means));
+  const setupNow = ratio(t.setup_done, t.installs), setupPrev = ratio(p.setup_done, p.installs);
+  const probNow = ratio(t.problems, t.active), probPrev = ratio(p.problems, p.active);
+  return h("div", { class: "card" },
+    h("h3", {}, "Weekly health"),
+    h("p", { class: "sub" }, "Five numbers that cover a new student's journey, worked out for you. Check them once a week; the rest of the dashboard explains why one moved."),
+    h("div", { class: "health" },
+      metric("Setup completion", setupNow, t.installs ? `${fmt(t.setup_done)} of ${fmt(t.installs)} new installs` : "No installs yet",
+        pts(setupNow, setupPrev), "Share of new students who finish setup."),
+      metric("First session finished", ratio(stepN("taster finished"), stepN("taster started")),
+        stepN("taster started") ? `${fmt(stepN("taster finished"))} of ${fmt(stepN("taster started"))} first sessions` : "No first sessions yet",
+        h("div", { class: "delta" }, ""), "Share who finish the first session after setup."),
+      metric("Day 1 return", r1 ? ratio(r1.d1, r1.installs) : null, r1 ? `Installed week of ${dayLabel(r1.week)}` : "Not enough days yet",
+        h("div", { class: "delta" }, ""), "Opened the app again the day after installing."),
+      metric("Day 7 return", r7 ? ratio(r7.d7, r7.installs) : null, r7 ? `Installed week of ${dayLabel(r7.week)}` : "Not enough days yet",
+        h("div", { class: "delta" }, ""), "Still opening the app a week after installing."),
+      metric("Problems per 100 days", probNow, t.active ? `${fmt(t.problems)} problems over ${fmt(t.active)} active days` : "No active days yet",
+        pts(probNow, probPrev, false, ""), "Failures for every 100 days someone used the app. Lower is better.")));
+}
+
 function overview(c, d) {
+  c.append(healthCard(d));
   const days = d.daily.map((r) => r.day);
   const card = h("div", { class: "card" });
   const tabs = h("div", { class: "kpis" });
@@ -703,15 +813,17 @@ function overview(c, d) {
     const delta = deltaEl(cur, prev);
     if (k.badWhenUp && delta.classList.contains("up")) { delta.classList.replace("up", "down"); }
     else if (k.badWhenUp && delta.classList.contains("down")) { delta.classList.replace("down", "up"); }
-    tabs.append(h("button", { class: "kpi" + (state.kpi === k.key ? " on" : ""), onclick: () => { state.kpi = k.key; render(); drawChartIn(); } },
+    tabs.append(h("button", { class: "kpi" + (state.kpi === k.key ? " on" : ""), title: `${k.label}: ${KPI_HELP[k.key]}. Click to chart it.`, onclick: () => { state.kpi = k.key; render(); drawChartIn(); } },
       h("div", { class: "label" }, k.label), h("div", { class: "value" }, k.perDay ? fmt1(cur) : fmt(cur)), delta));
   }
   const sel = KPIS.find((k) => k.key === state.kpi);
-  card.append(tabs, lineChart(days, [{ name: sel.label.replace("Avg daily active", "Active that day"), color: "--s1", values: d.daily.map((r) => r[sel.series]) }]));
-  c.append(card);
+  card.append(tabs, h("p", { class: "caption" }, "Chart: ", h("b", {}, sel.label.replace("Avg daily active", "Active devices")), ` per day, ${KPI_HELP[sel.key]}. Click another number above to chart it; hover the chart for one day.`),
+    lineChart(days, [{ name: sel.label.replace("Avg daily active", "Active that day"), color: "--s1", values: d.daily.map((r) => r[sel.series]) }]));
+  c.append(h("div", { style: "margin-top:18px" }, card));
 
   const steps = d.setup_steps || [];
   const first = steps[0]?.n || 0, setupDone = steps.find((x) => x.step === "setup done")?.n || 0, tasterDone = steps.find((x) => x.step === "taster finished")?.n || 0;
+  // (Steps are named in plain words on the Setup funnel page: stepName.)
   const welcome = d.welcome || {};
   const funnel = h("div", { class: "card" }, h("h3", {}, "From install to first session"), h("p", { class: "sub" }, "Share of first opens that reach each point. The Setup funnel page has every screen."),
     bars([
@@ -721,9 +833,10 @@ function overview(c, d) {
       { name: "Finished first session", value: tasterDone },
       { name: "Made an account", value: d.totals.accounts },
     ].map((r) => ({ ...r, share: true, note: first ? `${pct(r.value, first)}%` : "" }))));
-  const devices = h("div", { class: "card" }, h("h3", {}, "Devices"), h("p", { class: "sub" }, "Days with the app opened, by device type."),
+  const devices = h("div", { class: "card" }, h("h3", {}, "Devices"), h("p", { class: "sub" }, "Days someone opened the app, by device type."),
     bars((d.platforms || []).map((p) => ({ name: PLATFORM[p.platform] || p.platform, value: p.n }))),
     h("h3", { style: "margin-top:18px" }, "App versions"),
+    h("p", { class: "sub" }, "Which app versions are in use. An old version hanging on means students haven't updated."),
     table(["Version", "Days opened"], (d.versions || []).slice(0, 6).map((v) => [v.app_version, fmt(v.n)]), [1]));
   const fbNew = state.feedback.filter((f) => f.status === "new");
   const latest = h("div", { class: "card" }, h("h3", {}, "Latest feedback"), h("p", { class: "sub" }, `${fbNew.length} new`),
@@ -740,13 +853,13 @@ function setup(c, d) {
   let worst = null;
   steps.forEach((x) => { if (x.drop_off_pct != null && (worst == null || x.drop_off_pct > worst.drop_off_pct)) worst = x; });
   c.append(h("div", { class: "card" }, h("h3", {}, "Setup, screen by screen"),
-    h("p", { class: "sub" }, `How many times each screen was reached in the last ${Math.min(180, d.days)} days, and the drop from the screen before. ${worst ? `Biggest drop: ${worst.step} (${worst.drop_off_pct}%).` : ""} A screen seen twice after Back counts twice.`),
-    bars(steps.map((x) => ({ name: x.step[0].toUpperCase() + x.step.slice(1), value: x.n, worst: worst && x.pos === worst.pos, note: x.drop_off_pct != null && x.drop_off_pct > 0 ? `−${x.drop_off_pct}%` : "" })))));
+    h("p", { class: "sub" }, `In order, from opening the app to finishing the first session: how often each screen was reached in the last ${Math.min(180, d.days)} days, and the drop from the screen before (red). ${worst ? `Biggest drop: ${stepName(worst.step)}, ${worst.drop_off_pct}% fewer than the screen before.` : ""} A screen seen twice after Back counts twice, so compare neighbouring bars.`),
+    bars(steps.map((x) => ({ name: stepName(x.step), value: x.n, worst: worst && x.pos === worst.pos, note: x.drop_off_pct != null && x.drop_off_pct > 0 ? `−${x.drop_off_pct}%` : "" })))));
   const w = d.welcome || {}, ss = d.save_sheet || { choices: {} }, ai = d.ai_consent || {};
   c.append(h("div", { class: "grid3" },
-    h("div", { class: "card" }, h("h3", {}, "Welcome screen"), h("p", { class: "sub" }, `Shown ${fmt(w.shown)} times.`),
+    h("div", { class: "card" }, h("h3", {}, "Welcome screen"), h("p", { class: "sub" }, `The first screen. Shown ${fmt(w.shown)} times.`),
       bars([{ name: "Get started", value: w.get_started || 0 }, { name: "I already have an account", value: w.sign_in || 0 }])),
-    h("div", { class: "card" }, h("h3", {}, "Save your progress sheet"), h("p", { class: "sub" }, `Shown ${fmt(ss.shown)} times.`),
+    h("div", { class: "card" }, h("h3", {}, "Save your progress sheet"), h("p", { class: "sub" }, `Offers an account after the first session. Shown ${fmt(ss.shown)} times.`),
       bars(Object.entries(ss.choices || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ name: CHOICE[k] || k, value: v })))),
     h("div", { class: "card" }, h("h3", {}, "AI permission"), h("p", { class: "sub" }, "What students chose when first asked."),
       bars(Object.entries(ai).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ name: k === "not_now" ? "Not now" : CHOICE[k] || k, value: v }))))));
@@ -779,7 +892,7 @@ function sessions(c, d) {
   const a = d.answers || {}, total = (a.right || 0) + (a.partly || 0) + (a.wrong || 0);
   const seg = (v, color, label) => v ? h("div", { style: `flex:${v};background:var(${color})`, title: `${label}: ${fmt(v)} (${pct(v, total)}%)` }) : null;
   c.append(h("div", { class: "grid2" },
-    h("div", { class: "card" }, h("h3", {}, "By kind of session"),
+    h("div", { class: "card" }, h("h3", {}, "By kind of session"), h("p", { class: "sub" }, "Finished % is the share of started sessions that reached the end."),
       table(["Kind", "Started", "Finished", "Ended early", "Finished %"], (d.session_kinds || []).map((k) => [KIND[k.kind] || k.kind, fmt(k.started), fmt(k.finished), fmt(k.ended_early), k.started ? `${pct(k.finished, k.started)}%` : "–"]), [1, 2, 3, 4])),
     h("div", { class: "card" }, h("h3", {}, "Why sessions ended early"), h("p", { class: "sub" }, "The optional reason on the End session card."),
       bars((d.end_reasons || []).map((r) => ({ name: REASON[r.reason] || r.reason, value: r.n }))))));
@@ -794,8 +907,9 @@ function problems(c, d) {
   c.append(h("div", { class: "card" }, h("h3", {}, "Problems each day"), h("p", { class: "sub" }, "Failures the app counted: AI marking, sign-in, saving and opening progress."),
     lineChart(days, [{ name: "Problems", color: "--s2", values: d.daily.map((r) => r.problems) }], { height: 220, area: false })));
   c.append(h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "By type"),
-    table(["What", "Code", "Where", "Times"], (d.problems || []).map((p) => [PROBLEM[p.name] || p.name, p.code || "–", p.place || "–", fmt(p.n)]), [3]),
-    h("p", { class: "note", style: "margin-top:10px" }, "Codes: offline (no connection), 401 (signed out), 429 (allowance used), guest_expired (guest's free AI day over), consent_off (AI turned off), server, parse (the AI's reply couldn't be read).")));
+    h("p", { class: "sub" }, "Most common first. Hover a code for its short name."),
+    table(["What failed", "What it means", "Where", "Times"], (d.problems || []).map((p) => [PROBLEM[p.name] || p.name,
+      h("span", { title: p.code || "" }, codeText(p.code)), PLACE[p.place] || p.place || "–", fmt(p.n)]), [3])));
 }
 
 function feedback(c, d) {
@@ -923,6 +1037,12 @@ function demoFeedback() {
 }
 
 // ---------- start ----------
+// Open on the page in the link (#setup and so on) and the range used last time.
+{
+  const start = location.hash.slice(1);
+  if (TITLES[start]) { state.page = start; document.querySelectorAll(".tab").forEach((n) => n.classList.toggle("on", n.dataset.page === start)); }
+  try { const r = Number(localStorage.getItem("syllabo-dash-days")); if ([7, 28, 90, 365].includes(r)) { state.days = r; document.querySelectorAll("#range button").forEach((n) => n.classList.toggle("on", Number(n.dataset.days) === r)); } } catch {}
+}
 state.session = loadSession();
 if (DEMO) startApp();
 else if (state.session && CFG.url) startApp();
