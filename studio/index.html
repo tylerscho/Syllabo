@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src https://*.supabase.co; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src https://ktceskjocaycnquayffd.supabase.co; base-uri 'none'; form-action 'none'">
 <title>Syllabo Usage</title>
 <!--
   Syllabo's usage dashboard, for the laptop. Plan: docs/plans/2026-10-10-usage-dashboard.md.
@@ -279,7 +279,7 @@ tbody tr:hover { background: var(--wash); }
   .tab-ink, .seg-ink, .btn, .kpi::after, .linkish::after { transition: none; }
 }
 </style>
-<script>window.SYLLABO_DASH = {"url": "https://ktceskjocaycnquayffd.supabase.co", "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Y2Vza2pvY2F5Y25xdWF5ZmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQ3MDgsImV4cCI6MjEwNDcwMDcwOH0.nbpjbfvOV_dyPBhc4Ko6V8AuHyLviKxzhJUVGCS3DFQ"};</script>
+<script>window.SYLLABO_DASH = {"url": "https://ktceskjocaycnquayffd.supabase.co", "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Y2Vza2pvY2F5Y25xdWF5ZmZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMjQ3MDgsImV4cCI6MjEwNDcwMDcwOH0.nbpjbfvOV_dyPBhc4Ko6V8AuHyLviKxzhJUVGCS3DFQ", "published": true};</script>
 </head>
 <body>
 
@@ -366,8 +366,13 @@ tbody tr:hover { background: var(--wash); }
 
 <script>
 "use strict";
+// Inside another site's frame the page refuses to run, so nobody can lay it under a page of their own (clickjacking).
+if (window.top !== window.self) { document.documentElement.textContent = ""; throw new Error("framed"); }
 const CFG = window.SYLLABO_DASH || {};
-const DEMO = new URLSearchParams(location.search).has("demo");
+// The published copy (publish.command) has no demo mode, so a made-up screenshot can't pass as syllabo.org/studio.
+const DEMO = !CFG.published && new URLSearchParams(location.search).has("demo");
+/** A reply link only for a plain address; anything else (say, one carrying ?bcc=) stays text. */
+const PLAIN_EMAIL = /^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 // The dashboard isn't the app. A version far above any minimum lets it past the database's update gate
 // (check_app_version, Tools/supabase/app_version_gate.sql).
 const VERSION_HEADER = "999.0";
@@ -550,7 +555,7 @@ async function load(quiet) {
   try {
     if (DEMO) {
       state.data = demoData(state.days); state.feedback = demoFeedback();
-      state.team = { admins: [{ user_id: "1", email: "tyler@example.com", added_at: new Date().toISOString(), me: true }, { user_id: "2", email: "partner@example.com", added_at: new Date().toISOString(), me: false }], invites: [] };
+      state.team = { admins: [{ user_id: "1", email: "tyler@example.com", added_at: new Date().toISOString(), me: true, owner: true }, { user_id: "2", email: "partner@example.com", added_at: new Date().toISOString(), me: false }], invites: [] };
     }
     else {
       const [data, fb, team] = await Promise.all([rpc("usage_dashboard", { p_days: state.days, p_include_test: state.includeTest }),
@@ -938,7 +943,8 @@ function feedback(c, d) {
         f.subject ? h("span", {}, `${f.subject}${f.level ? " " + f.level : ""}`) : null,
         f.answer ? h("span", {}, `Their answer: ${f.answer}${f.mark ? ` (${f.mark})` : ""}`) : null,
         ctx.app_version ? h("span", {}, `${ctx.app_version} · ${PLATFORM[ctx.platform] || ctx.platform} · iOS ${ctx.os_major} · day ${ctx.days_since_install}`) : null,
-        f.contact ? h("span", {}, "Reply to ", h("a", { href: `mailto:${f.contact}?subject=${encodeURIComponent("Your Syllabo feedback")}` }, f.contact)) : h("span", { class: "note" }, "Anonymous")),
+        f.contact ? h("span", {}, "Reply to ", PLAIN_EMAIL.test(f.contact)
+          ? h("a", { href: `mailto:${f.contact}?subject=${encodeURIComponent("Your Syllabo feedback")}` }, f.contact) : f.contact) : h("span", { class: "note" }, "Anonymous")),
       crumbs.length ? h("details", {}, h("summary", {}, `The ${crumbs.length} steps before it, newest first`),
         h("ol", {}, crumbs.map((b) => h("li", {}, `${b.name}${Object.keys(b.detail || {}).length ? " " + Object.entries(b.detail).map(([k, v]) => `${k}=${v}`).join(" ") : ""} · ${b.ago < 60 ? b.ago + " s" : Math.round(b.ago / 60) + " min"} before`)))) : null,
       f.note ? h("div", { class: "note", style: "margin-top:6px" }, `Note: ${f.note}`) : null,
@@ -950,10 +956,13 @@ function feedback(c, d) {
 }
 function team(c) {
   const t = state.team || { admins: [], invites: [] };
+  const iOwn = t.admins.some((a) => a.me && a.owner);
   c.append(h("div", { class: "card" }, h("h3", {}, "Who can see this dashboard"),
-    h("p", { class: "sub" }, "Each person signs in with their own Syllabo account. Remove someone and they lose access at once."),
-    table(["Account", "Added", ""], t.admins.map((a) => [a.email + (a.me ? " (you)" : ""), new Date(a.added_at).toLocaleDateString(),
-      a.me || t.admins.length <= 1 ? "" : h("button", { class: "btn small", onclick: () => removeAdmin(a) }, "Remove")]))));
+    h("p", { class: "sub" }, iOwn ? "Each person signs in with their own Syllabo account. Remove someone and they lose access at once."
+                                  : "Each person signs in with their own Syllabo account. Only the owner can remove people."),
+    table(["Account", "Added", ""], t.admins.map((a) => [a.email + (a.me ? " (you)" : "") + (a.owner ? " · owner" : ""),
+      new Date(a.added_at).toLocaleDateString(),
+      !iOwn || a.owner ? "" : h("button", { class: "btn small", onclick: () => removeAdmin(a) }, "Remove")]))));
   const keyBox = h("div", { class: "card", style: "margin-top:16px" }, h("h3", {}, "Add someone"),
     h("p", { class: "sub" }, "Make a team key and send it to them privately (not in a group chat). They open this page, sign in with their Syllabo account and enter the key. A key works for 2 people and expires after 14 days."),
     state.newKey ? h("div", { style: "margin:4px 0 12px" }, h("div", { class: "note" }, "New key, shown only now:"),
